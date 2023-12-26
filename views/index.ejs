@@ -1,11 +1,22 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-  </head>
-  <body>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
-  </body>
+<html lang="en">
+
+<head>
+  <%- include('partials/head') %>
+</head>
+
+<body>
+  <%- include('partials/sidebar') %>
+    <main>
+      <h1>
+        <%= locals.title %>
+      </h1>
+      <h2>Stats</h2>
+      <p>Total items: <%= locals.itemsCount %>
+      </p>
+      <p>Total categories: <%= locals.categoriesCount %>
+      </p>
+    </main>
+</body>
+
 </html>

@@ -1,0 +1,28 @@
+<aside class="sidebar">
+  <ul>
+    <li>
+      <div class="sidebar-item"><a href="/">Home</a></div>
+    </li>
+    <li>
+      <div class="sidebar-item"><a href="/items">Items</a></div>
+    </li>
+    <li>
+      <div class="sidebar-item">
+        <a href="/categories">Categories</a>
+        <a aria-label="Create new category" class="material-icons" href="/category/create">add</a>
+      </div>
+
+      <% if (locals.categories) { %>
+        <ul>
+          <% locals.categories.forEach((category)=> { %>
+            <li>
+              <a href="/category/<%= category._id%>">
+                <%= category.name %>
+              </a>
+            </li>
+            <% }) %>
+        </ul>
+        <% } %>
+    </li>
+  </ul>
+</aside>
