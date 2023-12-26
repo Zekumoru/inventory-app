@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <%- include('partials/head') %>
+  </head>
+
+  <body>
+    <%- include('partials/sidebar') %>
+    
+    <main>
+      <h1><%= locals.title %></h1>
+      <a href="/item/create">Create new item</a>
+      
+      <% if (locals.items && locals.items.length) { %>
+        <ul>
+          <% locals.items.forEach((item) => { %>
+            <li>
+              <a href="<%= item.url %>"><%= item.name %></a>
+              <div>Category: <%= item.category.name %></div>
+              <div>Price: $<%= item.price.toFixed(2) %></div>
+              <div>Units left: <%= item.units %></div>
+              <p><%= item.description %></p>
+            </li>
+          <% }) %>
+        </ul>
+      <% } else { %> <% } %>
+    </main>
+  </body>
+</html>

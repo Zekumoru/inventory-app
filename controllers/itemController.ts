@@ -1,9 +1,25 @@
 import { NextFunction, Request, Response } from "express";
 import asyncHandler from "express-async-handler";
+import Item, { IItem } from "../models/Item";
+
+// Types for item list
+interface ItemListLocals extends Record<string, any> {
+  title?: string;
+  items?: IItem[];
+}
+
+interface ItemListResponse extends Omit<Response<{}, ItemListLocals>, 'render'> {
+  render: (view: string, options?: Required<ItemListLocals>) => void;
+};
 
 // Display all items
-export const item_list = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  throw new Error('Not implemented yet!');
+export const item_list = asyncHandler(async (req: Request, res: ItemListResponse, next: NextFunction) => {
+  const items = await Item.find<IItem>().populate('category').sort({ name: 1 }).exec();
+
+  res.render('item_list', {
+    title: 'Items',
+    items,
+  });
 });
 
 // Display detail page for an item
