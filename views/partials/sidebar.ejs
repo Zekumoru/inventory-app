@@ -16,13 +16,11 @@
         <ul>
           <% locals.categories.forEach((category)=> { %>
             <li>
-              <a href="/category/<%= category._id%>">
-                <%= category.name %>
-              </a>
+              <a href="/category/<%= category._id%>"><%= category.name %></a>
             </li>
-            <% }) %>
+          <% }) %>
         </ul>
-        <% } %>
+      <% } %>
     </li>
   </ul>
 </aside>
