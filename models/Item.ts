@@ -1,4 +1,18 @@
-import { Schema, model } from "mongoose";
+import { Schema, Types, model } from "mongoose";
+import { ICategory } from "./Category";
+
+export interface IItem {
+  name: string;
+  description: string;
+  category: ICategory | Types.ObjectId;
+  price: number;
+  units: number;
+  createdAt: Date;
+  updated: Date;
+
+  // virtuals
+  url: string;
+}
 
 const ItemSchema = new Schema({
   name: {

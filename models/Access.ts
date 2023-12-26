@@ -1,4 +1,12 @@
-import { Schema, model } from 'mongoose'
+import { Schema, Types, model } from 'mongoose'
+import { IItem } from './Item';
+import { ICategory } from './Category';
+
+export interface IAccess {
+  item?: IItem | Types.ObjectId;
+  category?: ICategory | Types.ObjectId;
+  password: string;
+}
 
 const AccessSchema = new Schema({
   item: {

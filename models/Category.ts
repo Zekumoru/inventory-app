@@ -1,5 +1,15 @@
 import { Schema, model } from 'mongoose'
 
+export interface ICategory {
+  name: string;
+  description: string;
+  createdAt: Date;
+  updatedAt: Date;
+
+  // virtuals
+  url: string;
+}
+
 const CategorySchema = new Schema({
   name: {
     type: String,
