@@ -14,13 +14,13 @@ const CategorySchema = new Schema({
   name: {
     type: String,
     minLength: 1,
-    maxLength: 30,
+    maxLength: 80,
     required: true,
     trim: true,
   },
   description: {
     type: String,
-    maxLength: 300,
+    maxLength: 1200,
     trim: true,
   },
   createdAt: {

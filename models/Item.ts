@@ -18,13 +18,13 @@ const ItemSchema = new Schema({
   name: {
     type: String,
     minLength: 1,
-    maxLength: 50,
+    maxLength: 300,
     required: true,
     trim: true,
   },
   description: {
     type: String,
-    maxLength: 300,
+    maxLength: 3000,
     trim: true,
   },
   price: {
