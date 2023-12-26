@@ -46,7 +46,7 @@ export const item_detail = [
       });
     }
 
-    const item = await Item.findById<IItem>(req.params.id).exec();
+    const item = await Item.findById<IItem>(req.params.id).populate('category').exec();
 
     if (item === null) {
       // Item does not exist
