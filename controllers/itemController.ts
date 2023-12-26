@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import Item, { IItem } from "../models/Item";
+import { IdRequest } from "../types/controller";
 
 // Types for item list
 interface ItemListLocals extends Record<string, any> {
@@ -22,9 +23,32 @@ export const item_list = asyncHandler(async (req: Request, res: ItemListResponse
   });
 });
 
+// Types for item list
+interface ItemDetailLocals extends Record<string, any> {
+  title: string;
+  item: IItem | null;
+}
+
+interface ItemDetailResponse extends Omit<Response<{}, Partial<ItemDetailLocals>>, 'render'> {
+  render: (view: string, options?: ItemDetailLocals) => void;
+};
+
 // Display detail page for an item
-export const item_detail = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  throw new Error('Not implemented yet!');
+export const item_detail = asyncHandler(async (req: IdRequest, res: ItemDetailResponse, next: NextFunction) => {
+  const item = await Item.findById<IItem>(req.params.id).exec();
+
+  if (item === null) {
+    res.status(404);
+    return res.render('item_detail', {
+      title: 'Item not found',
+      item,
+    });
+  }
+
+  res.render('item_detail', {
+    title: `Item: ${item.name}`,
+    item,
+  })
 });
 
 // Display create form on GET
