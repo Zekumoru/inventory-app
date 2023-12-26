@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <%- include('partials/head') %>
+  </head>
+
+  <body>
+    <%- include('partials/sidebar') %>
+    
+    <main>
+      <h1><%= locals.title %></h1>
+      <a href="/category/create">Create new category</a>
+      
+      <% if (locals.categories && locals.categories.length) { %>
+        <% locals.categories.forEach((category) => { %>
+          <h3><a href="<%= category.url %>"><%= category.name %></a></h3>
+          <p><%= category.description %></p>
+        <% }) %>
+      <% } else { %> <% } %>
+    </main>
+  </body>
+</html>
