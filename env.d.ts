@@ -5,8 +5,9 @@ declare global {
       HOST: string;
       PORT: string;
       NODE_ENV: 'development' | 'production';
+      DEBUG: string;
     }
   }
 }
 
-export {};
+export { };

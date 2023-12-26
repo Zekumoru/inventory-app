@@ -6,10 +6,10 @@
 
 import 'dotenv/config';
 import app from '../app';
-import debug from 'debug';
+import debugExtended from '../utils/debug-extended';
 import http from 'http';
 
-debug('mini-message-board:server');
+const debug = debugExtended('inventory:server');
 
 /**
  * Get port from environment and store in Express.
@@ -30,7 +30,7 @@ const server = http.createServer(app);
  */
 
 server.listen(port, () => {
-  console.log(`Server started running on http://${hostname}:${port}`);
+  debug(`Server started running on http://${hostname}:${port}`);
 });
 server.on('error', onError);
 server.on('listening', onListening);
