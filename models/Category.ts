@@ -34,7 +34,7 @@ const CategorySchema = new Schema({
 })
 
 CategorySchema.virtual('url').get(function () {
-  return `/categories/${this._id}`
+  return `/category/${this._id}`
 })
 
 export default model('Category', CategorySchema);

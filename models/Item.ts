@@ -49,7 +49,7 @@ const ItemSchema = new Schema({
 });
 
 ItemSchema.virtual('url').get(function () {
-  return `/items/${this._id}`
+  return `/item/${this._id}`
 })
 
 export default model('Item', ItemSchema);
