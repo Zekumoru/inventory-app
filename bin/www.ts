@@ -8,8 +8,24 @@ import 'dotenv/config';
 import app from '../app';
 import debugExtended from '../utils/debug-extended';
 import http from 'http';
+import mongoose from 'mongoose';
 
 const debug = debugExtended('inventory:server');
+
+/**
+ * Connect to mongodb
+ */
+
+const dbConnectString = process.env.MONGODB_CONNECT_STRING;
+
+mongoose.set('strictQuery', false);
+
+(async () => {
+  await mongoose.connect(dbConnectString);
+  debug('Server connected successfully to mongodb');
+})().catch((error: { message: string }) => {
+  debug.error(`Server could not connect to mongodb: ${error.message}`);
+});
 
 /**
  * Get port from environment and store in Express.
