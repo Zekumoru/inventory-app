@@ -7,15 +7,15 @@
 
 <body>
   <%- include('partials/sidebar') %>
-  
+
   <main>
     <h1><%= locals.title %></h1>
-    <a href="/item/create">Create new item</a>
     
-    <% if (locals.items && locals.items.length) { %>
-      <%- include('partials/item_list') %>
+    <% if (!locals.category) { %>
+      <p>The category you're looking for does not exist.</p>
     <% } else { %>
-      <p>There are no items.</p>
+      <a href="/item/create">Create a new item for this category</a>
+      <%- include('partials/item_list') %>
     <% } %>
   </main>
 </body>
