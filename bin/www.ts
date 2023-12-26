@@ -21,6 +21,10 @@ const dbConnectString = process.env.MONGODB_CONNECT_STRING;
 mongoose.set('strictQuery', false);
 
 (async () => {
+  if (dbConnectString === undefined) {
+    throw new Error('mongodb connection string is not defined')
+  }
+
   await mongoose.connect(dbConnectString);
   debug('Server connected successfully to mongodb');
 })().catch((error: { message: string }) => {
