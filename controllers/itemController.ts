@@ -79,14 +79,16 @@ interface ItemFormBody {
   category: string | null;
   price: number;
   units: number;
+  referred?: boolean;
 }
 
 // Display create form on GET
-export const item_create_get = asyncHandler(async (req: Request, res: RenderResponse<ItemFormLocals>, next: NextFunction) => {
+export const item_create_get = asyncHandler(async (req: Request<{}, {}, ItemFormBody>, res: RenderResponse<ItemFormLocals>, next: NextFunction) => {
   const categories = await Category.find<ICategory>().sort({ name: 1 }).exec();
 
   res.render('item_form', {
     title: 'Create new item',
+    category: req.body.category,
     categories,
     constants,
   });
@@ -121,8 +123,21 @@ export const item_create_post = [
 
   // Process request after validation and sanitization
   asyncHandler(async (req: Request<{}, {}, ItemFormBody>, res: RenderResponse<ItemFormLocals>, next: NextFunction) => {
-    const errors = validationResult(req);
+    const title = "Create new item";
     const categories = await Category.find<ICategory>().sort({ name: 1 }).exec();
+
+    // Render with category set
+    // This is used for creating a new item coming from a category page.
+    if (req.body.referred) {
+      return res.render('item_form', {
+        category: req.body.category,
+        title,
+        categories,
+        constants,
+      })
+    }
+
+    const errors = validationResult(req);
     const isValidCategory = req.body.category === null || (isValidObjectId(req.body.category) && !!(await Category.findById<ICategory>(req.body.category).exec()));
 
     if (!errors.isEmpty() || !isValidCategory) {
@@ -142,7 +157,7 @@ export const item_create_post = [
 
       // There are errors. Pass them to the form view.
       return res.render('item_form', {
-        title: 'Create new item',
+        title,
         name: req.body.name,
         price: req.body.price,
         units: req.body.units,

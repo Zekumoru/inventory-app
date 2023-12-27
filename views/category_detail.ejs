@@ -14,7 +14,11 @@
     <% if (!locals.category) { %>
       <p>The category you're looking for does not exist.</p>
     <% } else { %>
-      <a href="/item/create">Create a new item for this category</a>
+      <form action="/item/create" method="post">
+        <input type="hidden" name="category" value="<%= category._id %>" />
+        <input type="hidden" name="referred" value="<%= true %>" />
+        <button type="submit" role="link">Create a new item for this category</button>
+      </form>
       <%- include('partials/item_list') %>
     <% } %>
   </main>
