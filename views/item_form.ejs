@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <%- include('partials/head') %>
+</head>
+
+<body>
+  <%- include('partials/sidebar') %>
+
+  <main>
+    <h1><%= locals.title %></h1>
+    
+    <form method="post">
+      <label for="name">Name</label>
+      <input id="name" name="name" type="text" value="<%= locals.name %>" minlength="<%= constants["item-name-min-length"] %>" maxlength="<%= constants["item-name-max-length"] %>" required />
+      <% if (locals.errors && locals.errors.name) { %>
+        <div class="error"><%= locals.errors.name.msg %></div>
+      <% } %>
+
+      <label for="price">Price</label>
+      <input id="price" name="price" type="number" value="<%= locals.price %>" min="0" required />
+      <% if (locals.errors && locals.errors.price) { %>
+        <div class="error"><%= locals.errors.price.msg %></div>
+      <% } %>
+
+      <label for="units">Units</label>
+      <input id="units" name="units" type="number" value="<%= locals.units %>" min="0" required />
+      <% if (locals.errors && locals.errors.units) { %>
+        <div class="error"><%= locals.errors.units.msg %></div>
+      <% } %>
+
+      <label for="category">Category</label>
+      <select id="category" name="category">
+        <option value=""> -- Uncategorized -- </option>
+        <% locals.categories.forEach((category) => { %>
+          <% if (locals.category && category._id.toString() === locals.category) { %>
+            <option value="<%= category._id %>" selected><%= category.name %></option>  
+          <% } else { %>
+            <option value="<%= category._id %>"><%= category.name %></option>  
+          <% } %>
+        <% }); %>
+      </select>
+      <% if (locals.errors && locals.errors.category) { %>
+        <div class="error"><%= locals.errors.category.msg %></div>
+      <% } %>
+
+      <label for="description">Description</label>
+      <textarea id="description" name="description" maxlength="<%= constants["item-description-max-length"] %>" cols="30" rows="10"><%= locals.description %></textarea>
+      <% if (locals.errors && locals.errors.description) { %>
+        <div class="error"><%= locals.errors.description.msg %></div>
+      <% } %>
+
+      <button>Create item</button>
+    </form>
+  </main>
+</body>
+
+</html>

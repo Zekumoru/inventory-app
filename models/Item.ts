@@ -1,10 +1,11 @@
 import { Schema, Types, model } from "mongoose";
 import { ICategory } from "./Category";
+import constants from "./constants";
 
 export interface IItem {
   name: string;
   description: string;
-  category: ICategory | Types.ObjectId;
+  category: ICategory | Types.ObjectId | null;
   price: number;
   units: number;
   createdAt: Date;
@@ -17,21 +18,23 @@ export interface IItem {
 const ItemSchema = new Schema({
   name: {
     type: String,
-    minLength: 1,
-    maxLength: 300,
+    minLength: constants["item-name-min-length"],
+    maxLength: constants["item-name-max-length"],
     required: true,
     trim: true,
   },
   description: {
     type: String,
-    maxLength: 3000,
+    maxLength: constants["item-description-max-length"],
     trim: true,
   },
   price: {
     type: Number,
+    min: 0,
   },
   units: {
     type: Number,
+    min: 0,
     default: 0,
   },
   category: {
