@@ -141,9 +141,15 @@ export const item_create_post = [
     const isValidCategory = req.body.category === null || (isValidObjectId(req.body.category) && !!(await Category.findById<ICategory>(req.body.category).exec()));
 
     if (!errors.isEmpty() || !isValidCategory) {
+      // Handle errors that cannot be implemented
+      // using express-validator's custom function
       const otherErrors = (() => {
         const map: Record<string, ValidationError> = {};
+
         if (!isValidCategory) {
+          // Invalid category id
+          // which should only happen if the user tries to be smart by
+          // editing the <select>'s <options>'s values
           map.category = {
             type: "field",
             value: req.body.category,
@@ -152,6 +158,7 @@ export const item_create_post = [
             location: "body",
           } as ValidationError;
         }
+
         return map
       })();
 
