@@ -16,7 +16,11 @@
     <% } else { %>
       <div>Price: $<%= item.price.toFixed(2) %></div>
       <div>Units left: <%= item.units %></div>
-      <div>Category: <a href="<%= item.category.url %>"><%= item.category.name %></a></div>
+      <% if (item.category) { %>
+        <div>Category: <a href="<%= item.category.url %>"><%= item.category.name %></a></div>
+      <% } else { %>
+        <div>Category: uncategorized</div>
+      <% } %>
       <p><%= item.description %></p>
     <% } %>
   </main>
