@@ -25,7 +25,7 @@ export const category_list = asyncHandler(async (req: Request, res: CategoryList
   });
 });
 
-// Types for category list
+// Types for category detail page
 interface CategoryDetailLocals extends Record<string, any> {
   title: string;
   category: ICategory | null;

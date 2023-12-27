@@ -24,7 +24,7 @@ export const item_list = asyncHandler(async (req: Request, res: ItemListResponse
   });
 });
 
-// Types for item list
+// Types for item detail page
 interface ItemDetailLocals extends Record<string, any> {
   title: string;
   item: IItem | null;
