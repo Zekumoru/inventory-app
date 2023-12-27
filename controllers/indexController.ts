@@ -2,20 +2,17 @@ import { NextFunction, Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import Category, { ICategory } from "../models/Category";
 import Item from "../models/Item";
+import { RenderResponse } from "../types/controller";
 
-interface IndexLocals extends Record<string, any> {
+interface IndexLocals {
   title?: string;
   categories?: ICategory[];
   categoriesCount?: number,
   itemsCount?: number,
 }
 
-interface IndexResponse extends Omit<Response<{}, IndexLocals>, 'render'> {
-  render: (view: string, options?: Required<IndexLocals>) => void;
-};
-
 // Display home page
-export const index = asyncHandler(async (req: Request, res: IndexResponse, next: NextFunction) => {
+export const index = asyncHandler(async (req: Request, res: RenderResponse<IndexLocals>, next: NextFunction) => {
   const categories = await Category.find<ICategory>().sort({ name: 1 }).exec();
   const itemsCount = await Item.countDocuments().exec();
 

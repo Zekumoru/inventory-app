@@ -1,21 +1,17 @@
 import { NextFunction, Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import Item, { IItem } from "../models/Item";
-import { IdRequest } from "../types/controller";
+import { IdRequest, RenderResponse } from "../types/controller";
 import { isValidObjectId } from "mongoose";
 
 // Types for item list
-interface ItemListLocals extends Record<string, any> {
-  title?: string;
-  items?: IItem[];
+interface ItemListLocals {
+  title: string;
+  items: IItem[];
 }
 
-interface ItemListResponse extends Omit<Response<{}, ItemListLocals>, 'render'> {
-  render: (view: string, options?: Required<ItemListLocals>) => void;
-};
-
 // Display all items
-export const item_list = asyncHandler(async (req: Request, res: ItemListResponse, next: NextFunction) => {
+export const item_list = asyncHandler(async (req: Request, res: RenderResponse<ItemListLocals>, next: NextFunction) => {
   const items = await Item.find<IItem>().populate('category').sort({ name: 1 }).exec();
 
   res.render('item_list', {
@@ -25,18 +21,14 @@ export const item_list = asyncHandler(async (req: Request, res: ItemListResponse
 });
 
 // Types for item detail page
-interface ItemDetailLocals extends Record<string, any> {
+interface ItemDetailLocals {
   title: string;
   item: IItem | null;
 }
 
-interface ItemDetailResponse extends Omit<Response<{}, Partial<ItemDetailLocals>>, 'render'> {
-  render: (view: string, options?: ItemDetailLocals) => void;
-};
-
 // Display detail page for an item
 export const item_detail = [
-  asyncHandler(async (req: IdRequest, res: ItemDetailResponse, next: NextFunction) => {
+  asyncHandler(async (req: IdRequest, res: RenderResponse<ItemDetailLocals>, next: NextFunction) => {
     if (!isValidObjectId(req.params.id)) {
       // Invalid item id
       res.status(400);

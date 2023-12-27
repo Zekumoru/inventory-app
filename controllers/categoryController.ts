@@ -1,22 +1,18 @@
 import { NextFunction, Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import Category, { ICategory } from "../models/Category";
-import { IdRequest } from "../types/controller";
+import { IdRequest, RenderResponse } from "../types/controller";
 import Item, { IItem } from "../models/Item";
 import { isValidObjectId } from "mongoose";
 
 // Types for category list
-interface CategoryListLocals extends Record<string, any> {
+interface CategoryListLocals {
   title?: string;
   categories?: ICategory[];
 }
 
-interface CategoryListResponse extends Omit<Response<{}, CategoryListLocals>, 'render'> {
-  render: (view: string, options?: Required<CategoryListLocals>) => void;
-};
-
 // Display all categories
-export const category_list = asyncHandler(async (req: Request, res: CategoryListResponse, next: NextFunction) => {
+export const category_list = asyncHandler(async (req: Request, res: RenderResponse<CategoryListLocals>, next: NextFunction) => {
   const categories = await Category.find<ICategory>().sort({ name: 1 }).exec();
 
   res.render('category_list', {
@@ -26,18 +22,14 @@ export const category_list = asyncHandler(async (req: Request, res: CategoryList
 });
 
 // Types for category detail page
-interface CategoryDetailLocals extends Record<string, any> {
+interface CategoryDetailLocals {
   title: string;
   category: ICategory | null;
   items: IItem[];
 }
 
-interface CategoryDetailResponse extends Omit<Response<{}, Partial<CategoryDetailLocals>>, 'render'> {
-  render: (view: string, options?: CategoryDetailLocals) => void;
-};
-
 // Display detail page for a category
-export const category_detail = asyncHandler(async (req: IdRequest, res: CategoryDetailResponse, next: NextFunction) => {
+export const category_detail = asyncHandler(async (req: IdRequest, res: RenderResponse<CategoryDetailLocals>, next: NextFunction) => {
   if (!isValidObjectId(req.params.id)) {
     res.status(400);
     return res.render('category_detail', {
