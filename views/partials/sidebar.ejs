@@ -1,4 +1,4 @@
-<aside class="sidebar">
+<aside class="sidebar" aria-label="main" role="navigation">
   <ul>
     <li>
       <div class="sidebar-item"><a href="/">Home</a></div>
@@ -9,11 +9,11 @@
     <li>
       <div class="sidebar-item">
         <a href="/categories">Categories</a>
-        <a aria-label="Create new category" class="material-icons" href="/category/create">add</a>
+        <button aria-label="Create new category" class="material-icons" href="/category/create">add</button>
       </div>
 
       <% if (locals.categories) { %>
-        <ul>
+        <ul aria-label="category" role="navigation">
           <% locals.categories.forEach((category)=> { %>
             <li>
               <a href="/category/<%= category._id%>"><%= category.name %></a>
