@@ -1,4 +1,5 @@
 import { Schema, model } from 'mongoose'
+import constants from './constants';
 
 export interface ICategory {
   name: string;
@@ -13,14 +14,14 @@ export interface ICategory {
 const CategorySchema = new Schema({
   name: {
     type: String,
-    minLength: 1,
-    maxLength: 80,
+    minLength: constants["category-name-min-length"],
+    maxLength: constants["category-name-max-length"],
     required: true,
     trim: true,
   },
   description: {
     type: String,
-    maxLength: 1200,
+    maxLength: constants["category-description-max-length"],
     trim: true,
   },
   createdAt: {

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <%- include('partials/head') %>
+</head>
+
+<body>
+  <%- include('partials/sidebar') %>
+
+  <main>
+    <h1><%= locals.title %></h1>
+    
+    <form method="post">
+      <label for="name">Name</label>
+      <input id="name" name="name" type="text" value="<%= locals.name %>" minlength="<%= constants["category-name-min-length"] %>" maxlength="<%= constants["category-name-max-length"] %>" required />
+      <% if (locals.errors && locals.errors.name) { %>
+        <div class="error"><%= locals.errors.name.msg %></div>
+      <% } %>
+
+      <label for="description">Description</label>
+      <textarea id="description" name="description" maxlength="<%= constants["category-description-max-length"] %>" cols="30" rows="10"><%= locals.description %></textarea>
+      <% if (locals.errors && locals.errors.description) { %>
+        <div class="error"><%= locals.errors.description.msg %></div>
+      <% } %>
+
+      <button>Create category</button>
+    </form>
+  </main>
+</body>
+
+</html>
