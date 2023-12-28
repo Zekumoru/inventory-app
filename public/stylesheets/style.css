@@ -94,7 +94,7 @@ button:hover {
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
 }
 
-.item-card {
+.item-list .item-card {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -103,27 +103,27 @@ button:hover {
   border-radius: 8px;
 }
 
-.item-name {
+.item-list .item-name {
   color: var(--text-color);
   font-size: 1.4rem;
   text-decoration: none;
 }
 
-.item-category,
-.item-category a {
+.item-list .item-category,
+.item-list .item-category a {
   color: var(--text-color-secondary);
 }
 
-.item-category a {
+.item-list .item-category a {
   text-decoration: underline;
   cursor: pointer;
 }
 
-.item-price {
+.item-list .item-price {
   font-size: 1.4rem;
 }
 
-.item-units {
+.item-list .item-units {
   text-align: end;
 }
 
@@ -133,9 +133,20 @@ button:hover {
   gap: 16px;
 }
 
-.category-name {
+.category-list .category-name {
   font-size: 1.4rem;
   text-decoration: underline;
+}
+
+/**
+ * Category detail styles
+ */
+
+.category-detail .category-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-block: 8px 16px;
 }
 
 /**

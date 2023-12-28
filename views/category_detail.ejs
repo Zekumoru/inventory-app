@@ -8,19 +8,25 @@
 <body>
   <%- include('partials/sidebar') %>
 
-  <main>
-    <h1><%= locals.title %></h1>
+  <main class="category-detail">
+    <h1 class="mb-8"><%= locals.title %></h1>
     
     <% if (!locals.category) { %>
       <p>The category you're looking for does not exist.</p>
     <% } else { %>
-      <form action="/item/create" method="post">
-        <input type="hidden" name="category" value="<%= category._id %>" />
-        <input type="hidden" name="referred" value="<%= true %>" />
-        <button type="submit" role="link">Create a new item for this category</button>
-      </form>
-      <a href="<%= category.url %>/update">Update this category</a>
-      <a href="<%= category.url %>/delete">Delete this category</a>
+      <p class="category-description mb-16"><%= category.description %></p>
+
+      <div class="category-buttons">
+        <form action="/item/create" method="post">
+          <input type="hidden" name="category" value="<%= category._id %>" />
+          <input type="hidden" name="referred" value="<%= true %>" />
+          <button type="submit" role="link">Create a new item for this category</button>
+        </form>
+        <a class="button" href="<%= category.url %>/update">Update this category</a>
+        <a class="button" href="<%= category.url %>/delete">Delete this category</a>
+      </div>
+
+      <h2>Items in this category</h2>
       <%- include('partials/item_list') %>
     <% } %>
   </main>
