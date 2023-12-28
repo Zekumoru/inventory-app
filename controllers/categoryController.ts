@@ -95,9 +95,8 @@ export const category_create_get = asyncHandler(async (req: Request, res: Render
   });
 });
 
-// Handle creating category on POST
-export const category_create_post = [
-  // Validate and sanitize fields
+// Validation array
+const categoryValidations = [
   body('name')
     .trim()
     .isLength({ min: constants["category-name-min-length"], max: constants["category-name-max-length"] })
@@ -108,6 +107,12 @@ export const category_create_post = [
     .isLength({ max: constants["category-description-max-length"] })
     .withMessage(`Description must be below or equal to ${constants["category-description-max-length"]} characters long`)
     .escape(),
+];
+
+// Handle creating category on POST
+export const category_create_post = [
+  // Validate and sanitize fields
+  ...categoryValidations,
 
   // Process request after validation and sanitization
   asyncHandler(async (req: Request<{}, {}, CategoryFormBody>, res: RenderResponse<CategoryFormLocals>, next: NextFunction) => {
@@ -179,11 +184,50 @@ export const category_delete_post = asyncHandler(async (req: IdRequest, res: Res
 });
 
 // Display update page on GET
-export const category_update_get = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  throw new Error('Not implemented yet!');
+export const category_update_get = asyncHandler(async (req: IdRequest, res: RenderResponse<CategoryFormLocals>, next: NextFunction) => {
+  const category = await Category.findById<ICategory>(req.params.id).exec();
+
+  if (category === null) {
+    // Category does not exist so redirect
+    return res.redirect('/categories');
+  }
+
+  res.render('category_form', {
+    title: 'Update category',
+    name: category.name,
+    description: category.description,
+    constants,
+  })
 });
 
 // Handle updating category on POST
-export const category_update_post = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  throw new Error('Not implemented yet!');
-});
+export const category_update_post = [
+  // Validate and sanitize fields
+  ...categoryValidations,
+
+  // Process request after validation and sanitization
+  asyncHandler(async (req: IdRequest, res: RenderResponse<CategoryFormLocals>, next: NextFunction) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      // There are errors. Pass them to the form view.
+      return res.render('category_form', {
+        title: 'Update category',
+        name: req.body.name,
+        description: req.body.description,
+        errors: errors.mapped(),
+        constants,
+      });
+    }
+
+    // Update category
+    const category = new Category({
+      name: req.body.name,
+      description: req.body.description,
+      _id: req.params.id,
+    });
+
+    await Category.findByIdAndUpdate(req.params.id, category);
+    res.redirect((category as unknown as ICategory).url);
+  })
+];
