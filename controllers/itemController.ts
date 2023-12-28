@@ -106,8 +106,7 @@ export const item_create_get = asyncHandler(async (req: Request<{}, {}, ItemForm
 });
 
 // Validation array
-
-const itemCreateValidations = [
+const itemValidations = [
   body('name')
     .trim()
     .isLength({ min: constants["item-name-min-length"], max: constants["item-name-max-length"] })
@@ -142,7 +141,7 @@ const itemCreateValidations = [
 // Handle creating item on POST
 export const item_create_post = [
   // Validate and sanitize fields
-  ...itemCreateValidations,
+  ...itemValidations,
 
   // Process request after validation and sanitization
   asyncHandler(async (req: Request<{}, {}, ItemFormBody>, res: RenderResponse<ItemFormLocals>, next: NextFunction) => {
@@ -247,7 +246,7 @@ export const item_update_get = asyncHandler(async (req: IdRequest, res: RenderRe
 // Handle updating item on POST
 export const item_update_post = [
   // Validate and sanitize fields
-  ...itemCreateValidations,
+  ...itemValidations,
 
   // Process request after validation and sanitization
   asyncHandler(async (req: IdRequest, res: RenderResponse<ItemFormLocals>, next: NextFunction) => {
