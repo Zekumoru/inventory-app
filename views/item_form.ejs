@@ -19,7 +19,7 @@
       <% } %>
 
       <label for="price">Price</label>
-      <input id="price" name="price" type="number" value="<%= locals.price %>" min="0" required />
+      <input id="price" name="price" type="number" step="0.01" value="<%= locals.price %>" min="0" required />
       <% if (locals.errors && locals.errors.price) { %>
         <div class="error"><%= locals.errors.price.msg %></div>
       <% } %>
