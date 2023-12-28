@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <%- include('partials/head') %>
+</head>
+
+<body>
+  <%- include('partials/sidebar') %>
+
+  <main>
+    <h1><%= locals.title %></h1>
+    
+    <% if (!locals.category) { %>
+      <p>The category you're looking for does not exist.</p>
+    <% } else { %>
+      <form action="<%= category.url %>/delete" method="post">
+        <h3><%= category.name %></h3>
+        <p>Are you sure you want to delete this category?</p>
+        <p class="warn">Deleting this category will put all of its items uncategorized!</p>
+        <button>Delete this category</button>
+      </form>
+    <% } %>
+  </main>
+</body>
+
+</html>

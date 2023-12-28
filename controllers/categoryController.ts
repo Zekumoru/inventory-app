@@ -23,22 +23,32 @@ export const category_list = asyncHandler(async (req: Request, res: RenderRespon
   });
 });
 
-// Types for category detail page
-interface CategoryDetailLocals {
+// Types for category detail/delete page
+interface CategoryLocals {
   title: string;
   category: ICategory | null;
   items: IItem[];
 }
 
+// Helper functions
+const checkObjectIdAndRender = (id: string, res: RenderResponse<CategoryLocals>, view: string, title: string) => {
+  if (isValidObjectId(id)) return false;
+
+  // Invalid item id
+  res.status(400);
+  res.render(view, {
+    title,
+    items: [],
+    category: null,
+  });
+
+  return true;
+}
+
 // Display detail page for a category
-export const category_detail = asyncHandler(async (req: IdRequest, res: RenderResponse<CategoryDetailLocals>, next: NextFunction) => {
-  if (!isValidObjectId(req.params.id)) {
-    res.status(400);
-    return res.render('category_detail', {
-      title: 'Invalid category id',
-      category: null,
-      items: [],
-    });
+export const category_detail = asyncHandler(async (req: IdRequest, res: RenderResponse<CategoryLocals>, next: NextFunction) => {
+  if (checkObjectIdAndRender(req.params.id, res, 'category_detail', 'Invalid category id')) {
+    return;
   }
 
   // Get details of category
@@ -126,13 +136,46 @@ export const category_create_post = [
 ];
 
 // Display delete page on GET
-export const category_delete_get = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  throw new Error('Not implemented yet!');
+export const category_delete_get = asyncHandler(async (req: IdRequest, res: RenderResponse<CategoryLocals>, next: NextFunction) => {
+  if (checkObjectIdAndRender(req.params.id, res, 'category_delete', 'Invalid category id')) {
+    return;
+  }
+
+  const category = await Category.findById<ICategory>(req.params.id).exec();
+
+  if (category === null) {
+    // No results
+    res.status(404);
+    return res.render('category_delete', {
+      title: 'Category not found',
+      category: null,
+      items: [],
+    });
+  }
+
+  res.render('category_delete', {
+    title: 'Delete category',
+    items: [],
+    category,
+  })
 });
 
 // Handle deleting category on POST
-export const category_delete_post = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  throw new Error('Not implemented yet!');
+export const category_delete_post = asyncHandler(async (req: IdRequest, res: Response, next: NextFunction) => {
+  const category = await Category.findByIdAndDelete<ICategory>(req.params.id).exec();
+
+  if (!category) {
+    // Category already deleted so redirect
+    return res.redirect('/categories');
+  }
+
+  const items = await Item.find({ category: req.params.id }).exec();
+  await Promise.all(items.map(async (item) => {
+    item.category = null;
+    item.save();
+  }));
+
+  res.redirect('/categories');
 });
 
 // Display update page on GET

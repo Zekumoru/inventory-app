@@ -19,6 +19,7 @@
         <input type="hidden" name="referred" value="<%= true %>" />
         <button type="submit" role="link">Create a new item for this category</button>
       </form>
+      <a href="<%= category.url %>/delete">Delete this category</a>
       <%- include('partials/item_list') %>
     <% } %>
   </main>
