@@ -123,6 +123,9 @@ const itemValidations = [
     body('category')
       .customSanitizer((categoryId: string) => (categoryId === "") ? null : categoryId)
       .custom(async (categoryId) => {
+        // category id null means uncategorized
+        if (categoryId === null) return;
+
         const errorMessage = "Invalid category id, don't try to be smart, I know you're editing the <option>'s value.";
         if (!isValidObjectId(categoryId)) throw new Error(errorMessage);
 
