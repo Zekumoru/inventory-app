@@ -105,9 +105,9 @@ export const item_create_get = asyncHandler(async (req: Request<{}, {}, ItemForm
   });
 });
 
-// Handle creating item on POST
-export const item_create_post = [
-  // Validate and sanitize fields
+// Validation array
+
+const itemCreateValidations = [
   body('name')
     .trim()
     .isLength({ min: constants["item-name-min-length"], max: constants["item-name-max-length"] })
@@ -137,6 +137,12 @@ export const item_create_post = [
     .trim()
     .isInt({ min: 0 })
     .withMessage(`Units must be a positive integer`),
+];
+
+// Handle creating item on POST
+export const item_create_post = [
+  // Validate and sanitize fields
+  ...itemCreateValidations,
 
   // Process request after validation and sanitization
   asyncHandler(async (req: Request<{}, {}, ItemFormBody>, res: RenderResponse<ItemFormLocals>, next: NextFunction) => {
@@ -215,11 +221,65 @@ export const item_delete_post = asyncHandler(async (req: Request, res: Response,
 });
 
 // Display update page on GET
-export const item_update_get = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  throw new Error('Not implemented yet!');
+export const item_update_get = asyncHandler(async (req: IdRequest, res: RenderResponse<ItemFormLocals>, next: NextFunction) => {
+  const [item, categories] = await Promise.all([
+    Item.findById(req.params.id).exec(),
+    Category.find<ICategory>().sort({ name: 1 }).exec(),
+  ]);
+
+  if (item === null) {
+    // Item does not exist so redirect
+    return res.redirect('/items');
+  }
+
+  res.render('item_form', {
+    title: 'Update item',
+    name: item.name,
+    description: item.description ?? '',
+    category: item.category?._id.toString() ?? null,
+    price: item.price!,
+    units: item.units,
+    categories,
+    constants,
+  })
 });
 
 // Handle updating item on POST
-export const item_update_post = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  throw new Error('Not implemented yet!');
-});
+export const item_update_post = [
+  // Validate and sanitize fields
+  ...itemCreateValidations,
+
+  // Process request after validation and sanitization
+  asyncHandler(async (req: IdRequest, res: RenderResponse<ItemFormLocals>, next: NextFunction) => {
+    const categories = await Category.find<ICategory>().sort({ name: 1 }).exec();
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      // There are errors. Pass them to the form view.
+      return res.render('item_form', {
+        title: 'Update item',
+        name: req.body.name,
+        price: req.body.price,
+        units: req.body.units,
+        description: req.body.description,
+        category: req.body.category,
+        errors: errors.mapped(),
+        categories,
+        constants,
+      });
+    }
+
+    // Update item
+    const item = new Item({
+      name: req.body.name,
+      description: req.body.description,
+      price: req.body.price,
+      units: req.body.units,
+      category: req.body.category,
+      _id: req.params.id,
+    });
+
+    await Item.findByIdAndUpdate(req.params.id, item);
+    res.redirect((item as unknown as IItem).url);
+  })
+];
