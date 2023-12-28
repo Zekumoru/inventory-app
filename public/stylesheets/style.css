@@ -36,3 +36,25 @@ body {
 .sub-sidebar {
   display: none;
 }
+
+/**
+ * <main> styles
+ */
+
+main {
+  padding: 16px 24px;
+}
+
+h1 {
+  font-size: 1.8rem;
+  margin-bottom: 16px;
+}
+
+h2 {
+  font-size: 1.6rem;
+  margin-block: 16px 8px;
+}
+
+p {
+  margin-block: 8px;
+}
