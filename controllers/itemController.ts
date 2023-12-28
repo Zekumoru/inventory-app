@@ -6,6 +6,8 @@ import { Types, isValidObjectId } from "mongoose";
 import { ValidationError, body, validationResult } from "express-validator";
 import Category, { ICategory } from "../models/Category";
 import constants from "../models/constants";
+import { ResultWithContext } from "express-validator/src/chain";
+import asyncValidator from "../middlewares/asyncValidator";
 
 // Types for item list
 interface ItemListLocals {
@@ -107,11 +109,17 @@ export const item_create_post = [
     .isLength({ max: constants["item-description-max-length"] })
     .withMessage(`Description must be below or equal to ${constants["item-description-max-length"]}`)
     .escape(),
-  body('category')
-    .customSanitizer((categoryId: string) => {
-      if (categoryId === "") return null;
-      return categoryId;
-    }),
+  asyncValidator(
+    body('category')
+      .customSanitizer((categoryId: string) => (categoryId === "") ? null : categoryId)
+      .custom(async (categoryId) => {
+        const errorMessage = "Invalid category id, don't try to be smart, I know you're editing the <option>'s value.";
+        if (!isValidObjectId(categoryId)) throw new Error(errorMessage);
+
+        const category = await Category.findById(categoryId).exec();
+        if (!category) throw new Error(errorMessage);
+      })
+  ),
   body('price')
     .trim()
     .isFloat({ min: 0 })
@@ -138,30 +146,8 @@ export const item_create_post = [
     }
 
     const errors = validationResult(req);
-    const isValidCategory = req.body.category === null || (isValidObjectId(req.body.category) && !!(await Category.findById<ICategory>(req.body.category).exec()));
 
-    if (!errors.isEmpty() || !isValidCategory) {
-      // Handle errors that cannot be implemented
-      // using express-validator's custom function
-      const otherErrors = (() => {
-        const map: Record<string, ValidationError> = {};
-
-        if (!isValidCategory) {
-          // Invalid category id
-          // which should only happen if the user tries to be smart by
-          // editing the <select>'s <options>'s values
-          map.category = {
-            type: "field",
-            value: req.body.category,
-            msg: "Invalid category id, don't try to be smart, I know you edited the <select> element.",
-            path: "category",
-            location: "body",
-          } as ValidationError;
-        }
-
-        return map
-      })();
-
+    if (!errors.isEmpty()) {
       // There are errors. Pass them to the form view.
       return res.render('item_form', {
         title,
@@ -170,7 +156,7 @@ export const item_create_post = [
         units: req.body.units,
         description: req.body.description,
         category: req.body.category,
-        errors: { ...errors.mapped(), ...otherErrors },
+        errors: errors.mapped(),
         categories,
         constants,
       });
