@@ -25,22 +25,31 @@ export const item_list = asyncHandler(async (req: Request, res: RenderResponse<I
   });
 });
 
-// Types for item detail page
-interface ItemDetailLocals {
+// Types for item detail/delete page
+interface ItemLocals {
   title: string;
   item: IItem | null;
 }
 
+// Helper functions
+const checkObjectIdAndRender = (id: string, res: RenderResponse<ItemLocals>, view: string, title: string) => {
+  if (isValidObjectId(id)) return false;
+
+  // Invalid item id
+  res.status(400);
+  res.render(view, {
+    title,
+    item: null,
+  });
+
+  return true;
+}
+
 // Display detail page for an item
 export const item_detail = [
-  asyncHandler(async (req: IdRequest, res: RenderResponse<ItemDetailLocals>, next: NextFunction) => {
-    if (!isValidObjectId(req.params.id)) {
-      // Invalid item id
-      res.status(400);
-      return res.render('item_detail', {
-        title: 'Invalid item id',
-        item: null,
-      });
+  asyncHandler(async (req: IdRequest, res: RenderResponse<ItemLocals>, next: NextFunction) => {
+    if (checkObjectIdAndRender(req.params.id, res, 'item_detail', 'Invalid item id')) {
+      return;
     }
 
     const item = await Item.findById<IItem>(req.params.id).populate('category').exec();
@@ -177,13 +186,32 @@ export const item_create_post = [
 ];
 
 // Display delete page on GET
-export const item_delete_get = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  throw new Error('Not implemented yet!');
-});
+export const item_delete_get = asyncHandler(async (req: IdRequest, res: RenderResponse<ItemLocals>, next: NextFunction) => {
+  if (checkObjectIdAndRender(req.params.id, res, 'item_delete', 'Invalid item id')) {
+    return;
+  }
+
+  const item = await Item.findById<IItem>(req.params.id).populate('category').exec();
+
+  if (item === null) {
+    // No results
+    res.status(404);
+    return res.render('item_delete', {
+      title: 'Item not found',
+      item: null,
+    });
+  }
+
+  res.render('item_delete', {
+    title: 'Delete an item',
+    item,
+  });
+})
 
 // Handle deleting item on POST
 export const item_delete_post = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  throw new Error('Not implemented yet!');
+  await Item.findByIdAndDelete<IItem>(req.params.id).exec();
+  res.redirect('/items');
 });
 
 // Display update page on GET
