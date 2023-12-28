@@ -1,8 +1,38 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+:root {
+  --bg-color: #18122B;
+  --primary-color: #393053;
+  --secondary-color: #443C68;
+  --tertiary-color: #635985;
+  --text-color: white;
 }
 
-a {
-  color: #00B7FF;
+body {
+  font: 16px "Lucida Grande", Helvetica, Arial, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+/**
+ * Sibebar styles
+ */
+
+.sidebar {
+  background-color: var(--primary-color);
+}
+
+.sidebar-item a {
+  display: block;
+  padding: 16px 24px;
+  color: var(--text-color);
+  text-decoration: none;
+  position: relative;
+  font-weight: bold;
+}
+
+.sidebar-item a:hover {
+  background-color: var(--tertiary-color);
+}
+
+.sub-sidebar {
+  display: none;
 }
