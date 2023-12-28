@@ -2,7 +2,7 @@
   <% locals.items.forEach((item) => { %>
     <li>
       <a href="<%= item.url %>"><%= item.name %></a>
-      <div>Category: <%= item.category.name %></div>
+      <div>Category: <%= (item.category)? item.category.name : 'uncategorized' %></div>
       <div>Price: $<%= item.price.toFixed(2) %></div>
       <div>Units left: <%= item.units %></div>
       <p><%= item.description %></p>
