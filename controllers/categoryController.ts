@@ -76,6 +76,7 @@ export const category_detail = asyncHandler(async (req: IdRequest, res: RenderRe
 // Types for category create/update page
 interface CategoryFormLocals {
   title: string;
+  submitButtonText: string,
   name?: string;
   description?: string;
   errors?: Record<string, ValidationError>;
@@ -91,6 +92,7 @@ interface CategoryFormBody {
 export const category_create_get = asyncHandler(async (req: Request, res: RenderResponse<CategoryFormLocals>, next: NextFunction) => {
   res.render('category_form', {
     title: 'Create new category',
+    submitButtonText: 'Create category',
     constants,
   });
 });
@@ -122,6 +124,7 @@ export const category_create_post = [
       // There are errors. Pass them to the form view.
       return res.render('category_form', {
         title: 'Create new category',
+        submitButtonText: 'Create category',
         name: req.body.name,
         description: req.body.description,
         errors: errors.mapped(),
@@ -194,6 +197,7 @@ export const category_update_get = asyncHandler(async (req: IdRequest, res: Rend
 
   res.render('category_form', {
     title: 'Update category',
+    submitButtonText: 'Update category',
     name: category.name,
     description: category.description,
     constants,
@@ -213,6 +217,7 @@ export const category_update_post = [
       // There are errors. Pass them to the form view.
       return res.render('category_form', {
         title: 'Update category',
+        submitButtonText: 'Update category',
         name: req.body.name,
         description: req.body.description,
         errors: errors.mapped(),

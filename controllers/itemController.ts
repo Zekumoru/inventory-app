@@ -74,6 +74,7 @@ export const item_detail = [
 // Types for item create/update page
 interface ItemFormLocals {
   title: string;
+  submitButtonText: string;
   name?: string;
   description?: string;
   category?: string | null,
@@ -99,6 +100,7 @@ export const item_create_get = asyncHandler(async (req: Request<{}, {}, ItemForm
 
   res.render('item_form', {
     title: 'Create new item',
+    submitButtonText: 'Create item',
     category: req.body.category,
     categories,
     constants,
@@ -146,6 +148,7 @@ export const item_create_post = [
   // Process request after validation and sanitization
   asyncHandler(async (req: Request<{}, {}, ItemFormBody>, res: RenderResponse<ItemFormLocals>, next: NextFunction) => {
     const title = "Create new item";
+    const submitButtonText = "Create item";
     const categories = await Category.find<ICategory>().sort({ name: 1 }).exec();
 
     // Render with category set
@@ -153,6 +156,7 @@ export const item_create_post = [
     if (req.body.referred) {
       return res.render('item_form', {
         category: req.body.category,
+        submitButtonText,
         title,
         categories,
         constants,
@@ -165,6 +169,7 @@ export const item_create_post = [
       // There are errors. Pass them to the form view.
       return res.render('item_form', {
         title,
+        submitButtonText,
         name: req.body.name,
         price: req.body.price,
         units: req.body.units,
@@ -233,6 +238,7 @@ export const item_update_get = asyncHandler(async (req: IdRequest, res: RenderRe
 
   res.render('item_form', {
     title: 'Update item',
+    submitButtonText: 'Update item',
     name: item.name,
     description: item.description ?? '',
     category: item.category?._id.toString() ?? null,
@@ -257,6 +263,7 @@ export const item_update_post = [
       // There are errors. Pass them to the form view.
       return res.render('item_form', {
         title: 'Update item',
+        submitButtonText: 'Update item',
         name: req.body.name,
         price: req.body.price,
         units: req.body.units,
