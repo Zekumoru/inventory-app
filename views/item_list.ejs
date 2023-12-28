@@ -9,8 +9,8 @@
   <%- include('partials/sidebar') %>
   
   <main>
-    <h1><%= locals.title %></h1>
-    <a href="/item/create">Create new item</a>
+    <h1 class="mb-8"><%= locals.title %></h1>
+    <a class="mb-16 button" href="/item/create">Create new item</a>
     
     <% if (locals.items && locals.items.length) { %>
       <%- include('partials/item_list') %>

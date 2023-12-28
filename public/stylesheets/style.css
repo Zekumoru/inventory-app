@@ -4,11 +4,16 @@
   --secondary-color: #443C68;
   --tertiary-color: #635985;
   --text-color: white;
+  --text-color-secondary: #7e739e;
 }
 
 body {
   font: 16px "Lucida Grande", Helvetica, Arial, sans-serif;
   background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+a {
   color: var(--text-color);
 }
 
@@ -23,7 +28,6 @@ body {
 .sidebar-item a {
   display: block;
   padding: 16px 24px;
-  color: var(--text-color);
   text-decoration: none;
   position: relative;
   font-weight: bold;
@@ -57,4 +61,72 @@ h2 {
 
 p {
   margin-block: 8px;
+}
+
+button {
+  padding: 12px 24px;
+  color: var(--text-color);
+  background-color: var(--primary-color);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/**
+ * List styles
+ */
+
+.item-list {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+}
+
+.item-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px;
+  background-color: var(--primary-color);
+  border-radius: 8px;
+}
+
+.item-name {
+  color: var(--text-color);
+  font-size: 1.4rem;
+  text-decoration: none;
+}
+
+.item-category,
+.item-category a {
+  color: var(--text-color-secondary);
+}
+
+.item-category a {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.item-price {
+  font-size: 1.4rem;
+}
+
+.item-units {
+  text-align: end;
+}
+
+/**
+ * Utility classes
+ */
+
+.my-4 {
+  margin-block: 4px;
+}
+
+.mb-8 {
+  margin-bottom: 8px;
+}
+
+.mb-16 {
+  margin-bottom: 16px;
 }

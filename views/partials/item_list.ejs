@@ -1,11 +1,21 @@
-<ul>
+<ul class="item-list">
   <% locals.items.forEach((item) => { %>
-    <li>
-      <a href="<%= item.url %>"><%= item.name %></a>
-      <div>Category: <%= (item.category)? item.category.name : 'uncategorized' %></div>
-      <div>Price: $<%= item.price.toFixed(2) %></div>
-      <div>Units left: <%= item.units %></div>
-      <p><%= item.description %></p>
+    <li class="item-card">
+      <div>
+        <a class="item-name" href="<%= item.url %>"><%= item.name %></a>
+        <div class="my-4 item-category">
+          <% if (item.category) { %>
+            <a href="<%= item.category.url %>"><%= item.category.name %></a>
+          <% } else { %>
+            Not in a category
+          <% } %>
+        </div>
+        <div class="my-4 item-price">$<%= item.price.toFixed(2) %></div>
+      </div>
+      
+      <div>
+        <div class="my-4 item-units"><%= item.units %> left</div>
+      </div>
     </li>
   <% }) %>
 </ul>
