@@ -53,6 +53,11 @@ textarea {
   background-color: var(--primary-color);
 }
 
+.sidebar>ul {
+  display: flex;
+  flex-direction: column;
+}
+
 .sidebar-item a {
   display: block;
   padding: 16px 24px;
@@ -186,6 +191,31 @@ form .form-group {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+/**
+ * Desktop styles
+ */
+
+@media only screen and (min-width: 600px) {
+  /**
+   * Global styles
+   */
+
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /**
+   * Sidebar styles
+   */
+
+  .sidebar>ul {
+    max-width: 1200px;
+    margin: 0 auto;
+    flex-direction: row;
+  }
 }
 
 /**
