@@ -8,7 +8,7 @@
 <body>
   <%- include('partials/sidebar') %>
 
-  <main>
+  <main class="delete-view">
     <h1><%= locals.title %></h1>
     
     <% if (!locals.category) { %>
@@ -16,9 +16,8 @@
     <% } else { %>
       <form action="<%= category.url %>/delete" method="post">
         <h3><%= category.name %></h3>
-        <p>Are you sure you want to delete this category?</p>
-        <p class="warn">Deleting this category will put all of its items uncategorized!</p>
-        <button>Delete this category</button>
+        <p>Are you sure you want to delete this category? Deleting this category will put all of its items uncategorized!</p>
+        <button class="mt-16 delete-btn">Delete this category</button>
       </form>
     <% } %>
   </main>
