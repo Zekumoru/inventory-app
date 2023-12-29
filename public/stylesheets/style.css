@@ -270,3 +270,7 @@ form .form-group {
 .mt-16 {
   margin-top: 16px;
 }
+
+.underline {
+  text-decoration: underline;
+}
