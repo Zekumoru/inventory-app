@@ -16,7 +16,7 @@
     <% } else { %>
       <p class="category-description mb-16"><%= category.description %></p>
 
-      <div class="category-buttons">
+      <div class="buttons-flex-wrap">
         <form action="/item/create" method="post">
           <input type="hidden" name="category" value="<%= category._id %>" />
           <input type="hidden" name="referred" value="<%= true %>" />

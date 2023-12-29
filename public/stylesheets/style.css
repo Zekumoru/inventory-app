@@ -60,6 +60,11 @@ h2 {
   margin-block: 16px 8px;
 }
 
+h3 {
+  font-size: 1.4rem;
+  margin-block: 16px 8px;
+}
+
 p {
   margin-block: 8px;
 }
@@ -139,22 +144,39 @@ button:hover {
 }
 
 /**
- * Category detail styles
+ * Item detail styles
  */
 
-.category-detail .category-buttons {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-block: 8px 16px;
+.item-detail .item-category {
+  color: var(--text-color-secondary);
+}
+
+.item-detail .item-category a {
+  text-decoration: underline;
+}
+
+.item-detail .item-price {
+  font-size: 1.6rem;
 }
 
 /**
  * Utility classes
  */
 
+
+.buttons-flex-wrap {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-block: 8px 16px;
+}
+
 .my-4 {
   margin-block: 4px;
+}
+
+.mb-4 {
+  margin-bottom: 4px;
 }
 
 .mb-8 {

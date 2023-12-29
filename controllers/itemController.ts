@@ -65,7 +65,7 @@ export const item_detail = [
 
     // Render item
     res.render('item_detail', {
-      title: `Item: ${item.name}`,
+      title: `${item.name}`,
       item,
     })
   }),
