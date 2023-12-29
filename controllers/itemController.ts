@@ -2,12 +2,31 @@ import { NextFunction, Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import Item, { IItem } from "../models/Item";
 import { IdRequest, RenderResponse } from "../types/controller";
-import { Types, isValidObjectId } from "mongoose";
+import { isValidObjectId } from "mongoose";
 import { ValidationError, body, validationResult } from "express-validator";
 import Category, { ICategory } from "../models/Category";
 import constants from "../models/constants";
-import { ResultWithContext } from "express-validator/src/chain";
 import asyncValidator from "../middlewares/asyncValidator";
+import multer from 'multer';
+import path from "path";
+
+const getExtensionString = (filename: string) => {
+  return filename.substring(filename.lastIndexOf('.'));
+};
+
+const storage = multer.diskStorage({
+  destination: (req, file, callback) => {
+    callback(null, path.join(__dirname, '../uploads'))
+  },
+  filename: (req, file, callback) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    callback(null, file.fieldname + '-' + uniqueSuffix + getExtensionString(file.originalname));
+  },
+});
+
+const upload = multer({
+  storage,
+});
 
 // Types for item list
 interface ItemListLocals {
@@ -109,6 +128,7 @@ export const item_create_get = asyncHandler(async (req: Request<{}, {}, ItemForm
 
 // Validation array
 const itemValidations = [
+  upload.single('image'),
   body('name')
     .trim()
     .isLength({ min: constants["item-name-min-length"], max: constants["item-name-max-length"] })

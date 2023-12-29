@@ -1,3 +1,6 @@
+# Upload data
+/uploads
+
 # Logs
 logs
 *.log
