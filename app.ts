@@ -6,7 +6,6 @@ import logger from 'morgan';
 import indexRouter from './routes';
 import itemRouter from './routes/item';
 import categoryRouter from './routes/category';
-import loadSidebarCategories from './middlewares/loadSidebarCategories';
 
 const app = express();
 
@@ -19,9 +18,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
-// currently inefficient, check its file for more info
-app.use(loadSidebarCategories);
 
 app.use('/', indexRouter);
 app.use('/', itemRouter);

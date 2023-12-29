@@ -8,16 +8,6 @@
     </li>
     <li>
       <div class="sidebar-item"><a href="/categories">Categories</a></div>
-
-      <% if (locals.categories) { %>
-        <ul class="sub-sidebar" aria-label="category" role="navigation">
-          <% locals.categories.forEach((category)=> { %>
-            <li>
-              <a href="/category/<%= category._id%>"><%= category.name %></a>
-            </li>
-          <% }) %>
-        </ul>
-      <% } %>
     </li>
   </ul>
 </aside>
