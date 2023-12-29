@@ -9,11 +9,12 @@
   <%- include('partials/sidebar') %>
 
   <main class="category-detail">
-    <h1 class="mb-8"><%= locals.title %></h1>
+    <h1 class="mb-16"><%= locals.title %></h1>
     
     <% if (!locals.category) { %>
       <p>The category you're looking for does not exist.</p>
     <% } else { %>
+      <h3>Description</h3>
       <p class="category-description mb-16"><%= category.description %></p>
 
       <div class="buttons-flex-wrap">
@@ -27,7 +28,11 @@
       </div>
 
       <h2>Items in this category</h2>
-      <%- include('partials/item_list') %>
+      <% if (locals.items.length) { %>
+        <%- include('partials/item_list') %>
+      <% } else { %>
+        <p>There are no items in this category.</p>
+      <% } %>
     <% } %>
   </main>
 </body>
