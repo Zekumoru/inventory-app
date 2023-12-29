@@ -90,6 +90,24 @@ button:hover {
 }
 
 /**
+ * Item styles
+ */
+
+.item-category,
+.item-category a {
+  color: var(--text-color-secondary);
+}
+
+.item-category a {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.item-price {
+  font-size: 1.6rem;
+}
+
+/**
  * List styles
  */
 
@@ -114,16 +132,6 @@ button:hover {
   text-decoration: none;
 }
 
-.item-list .item-category,
-.item-list .item-category a {
-  color: var(--text-color-secondary);
-}
-
-.item-list .item-category a {
-  text-decoration: underline;
-  cursor: pointer;
-}
-
 .item-list .item-price {
   font-size: 1.4rem;
 }
@@ -144,25 +152,8 @@ button:hover {
 }
 
 /**
- * Item detail styles
- */
-
-.item-detail .item-category {
-  color: var(--text-color-secondary);
-}
-
-.item-detail .item-category a {
-  text-decoration: underline;
-}
-
-.item-detail .item-price {
-  font-size: 1.6rem;
-}
-
-/**
  * Utility classes
  */
-
 
 .buttons-flex-wrap {
   display: flex;
