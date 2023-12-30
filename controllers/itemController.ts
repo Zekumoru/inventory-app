@@ -10,6 +10,8 @@ import asyncValidator from "../middlewares/asyncValidator";
 import multer from 'multer';
 import path from "path";
 import fs from 'fs/promises';
+import Access, { IAccess } from "../models/Access";
+import InstanceAccess from "../models/InstanceAccess";
 
 const getExtensionString = (filename: string) => {
   return filename.substring(filename.lastIndexOf('.'));
@@ -130,6 +132,7 @@ interface ItemFormBody {
   category: string | null;
   price: number;
   units: number;
+  password: string;
   referred?: boolean;
 }
 
@@ -201,6 +204,19 @@ const itemValidations = [
 export const item_create_post = [
   // Validate and sanitize fields
   ...itemValidations,
+  asyncValidator(
+    body('password')
+      .custom(async (password) => {
+        const access = await Access.findOne<IAccess>({ password }).exec();
+        if (access === null) {
+          throw new Error('The password you entered has no permissions to create a new item');
+        }
+        if (access.perms.all || access.perms.insert) {
+          return;
+        }
+        throw new Error('The password you entered has no permissions to create a new item');
+      })
+  ),
 
   // Process request after validation and sanitization
   asyncHandler(async (req: Request<{}, {}, ItemFormBody>, res: RenderResponse<ItemFormLocals>, next: NextFunction) => {
@@ -246,9 +262,19 @@ export const item_create_post = [
       price: req.body.price,
       units: req.body.units,
       category: req.body.category,
-    })
+    });
 
-    await item.save();
+    const access = await Access.findOne({ password: req.body.password });
+    if (!access) throw new Error('Missing access document');
+    const accessInstance = new InstanceAccess({
+      item: item._id,
+      access: access._id,
+    });
+
+    await Promise.all([
+      item.save(),
+      accessInstance.save(),
+    ]);
     res.redirect((item as unknown as IItem).url);
   }),
 ];
@@ -278,12 +304,20 @@ export const item_delete_get = asyncHandler(async (req: IdRequest, res: RenderRe
 
 // Handle deleting item on POST
 export const item_delete_post = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  const item = await Item.findById<IItem>(req.params.id).exec();
-  await Item.deleteOne({ _id: req.params.id });
+  const item = await Item.findById(req.params.id).exec();
+  if (!item) throw new Error('Missing item to delete');
+
+  let imageFilePath = '';
   if (item && item.imageUrl) {
-    const filepath = path.join(__dirname, '../uploads' + item.imageUrl.substring('/upload'.length));
-    await fs.unlink(filepath);
+    imageFilePath = path.join(__dirname, '../uploads' + item.imageUrl.substring('/upload'.length));
   }
+
+  await Promise.all([
+    (imageFilePath) ? fs.unlink(imageFilePath) : null,
+    Item.deleteOne({ _id: req.params.id }).exec(),
+    InstanceAccess.deleteMany({ item: item._id }).exec(),
+  ]);
+
   res.redirect('/items');
 });
 
@@ -317,6 +351,29 @@ export const item_update_get = asyncHandler(async (req: IdRequest, res: RenderRe
 export const item_update_post = [
   // Validate and sanitize fields
   ...itemValidations,
+  asyncValidator(
+    body('password')
+      .custom(async (password, { req }) => {
+        const access = await Access.findOne({ password }).exec();
+        if (access === null) {
+          throw new Error('The password you entered has no permissions to update an item');
+        }
+
+        const accessInstance = await InstanceAccess.findOne({
+          item: req.params!.id,
+          access: access._id,
+        }).exec();
+        if (accessInstance === null) {
+          throw new Error('The password you entered has no permissions to update an item');
+        }
+
+        if (access.perms && (access.perms?.all || access.perms?.update)) {
+          return;
+        }
+
+        throw new Error('The password you entered has no permissions to update an item');
+      })
+  ),
 
   // Process request after validation and sanitization
   asyncHandler(async (req: IdRequest, res: RenderResponse<ItemFormLocals>, next: NextFunction) => {
