@@ -25,8 +25,12 @@ const storage = multer.diskStorage({
   },
 });
 
+const fileSizeLimitKB = 200;
 const upload = multer({
   storage,
+  limits: {
+    fileSize: 1024 * fileSizeLimitKB, // 200 KB
+  },
   fileFilter: (req, file, callback) => {
     if (file.mimetype.startsWith('image')) {
       return callback(null, true);
@@ -141,6 +145,10 @@ const itemValidations = [
   async (err: Error, req: Request, res: Response, next: NextFunction) => {
     await body('image')
       .custom(() => {
+        if (err.message.match(/File too large/)) {
+          throw new Error(`File too large, limit is ${fileSizeLimitKB} KB`);
+        }
+
         if (err.message) {
           throw err;
         }
@@ -336,7 +344,7 @@ export const item_update_post = [
 
     // Update item
     const item = new Item({
-      imageUrl,
+      imageUrl: imageUrl ?? prevItem?.imageUrl,
       name: req.body.name,
       description: req.body.description,
       price: req.body.price,
