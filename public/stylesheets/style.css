@@ -156,6 +156,10 @@ button:hover {
   font-size: 1.6rem;
 }
 
+.form-group .item-image {
+  width: 200px;
+}
+
 /**
  * List styles
  */
@@ -270,7 +274,6 @@ form .form-group {
   .item-detail .container {
     flex-direction: row;
   }
-
 }
 
 /**

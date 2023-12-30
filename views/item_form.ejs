@@ -64,8 +64,13 @@
       <div class="form-group">
         <label for="image">Select an image</label>
         <input id="image" name="image" type="file" accept="image/*" />
+        <input type="hidden" name="imageUrl" value="<%= locals.imageUrl %>">
         <% if (locals.errors && locals.errors.image) { %>
           <div class="error"><%= locals.errors.image.msg %></div>
+        <% } %>
+        <% if (locals.imageUrl) {%>
+          <p class="mb-4">Current image</p>
+          <img class="item-image" src="<%= locals.imageUrl %>" alt="">
         <% } %>
       </div>
       

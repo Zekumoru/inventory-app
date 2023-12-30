@@ -103,7 +103,7 @@ interface ItemFormLocals {
   title: string;
   submitButtonText: string;
   name?: string;
-  imageUrl?: string;
+  imageUrl?: string | null;
   description?: string;
   category?: string | null,
   price?: number;
@@ -288,6 +288,7 @@ export const item_update_get = asyncHandler(async (req: IdRequest, res: RenderRe
     title: 'Update item',
     submitButtonText: 'Update item',
     name: item.name,
+    imageUrl: item.imageUrl,
     description: item.description ?? '',
     category: item.category?._id.toString() ?? null,
     price: item.price!,
@@ -313,6 +314,7 @@ export const item_update_post = [
         title: 'Update item',
         submitButtonText: 'Update item',
         name: req.body.name,
+        imageUrl: req.body.imageUrl,
         price: req.body.price,
         units: req.body.units,
         description: req.body.description,
