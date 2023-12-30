@@ -35,17 +35,39 @@ const upload = multer({
     fileSize: 1024 * fileSizeLimitKB, // 200 KB
   },
   fileFilter: async (req, file, callback) => {
+    // Check if reached max storage
     const uploadDir = await fs.readdir(path.join(__dirname, '../uploads'));
-
     if (uploadDir.length > totalFilesLimit) {
       return callback(new Error('Reached maximum storage, you cannot upload anymore images'));
     }
 
-    if (file.mimetype.startsWith('image')) {
-      return callback(null, true);
+    // Check if has permisson to upload
+    const access = await Access.findOne({ password: req.body.password }).exec();
+    if (access === null) {
+      return callback(new Error('The password you entered has no permissions to upload an image'));
     }
 
-    return callback(new Error('Invalid file type, must be an image.'));
+    if (req.params.id) {
+      const accessInstance = await InstanceAccess.findOne({
+        item: req.params.id,
+        access: access._id,
+      }).exec();
+      if (accessInstance === null) {
+        return callback(new Error('The password you entered has no permissions to upload an image'));
+      }
+    }
+
+    if (access.perms && !(access.perms?.all || access.perms?.upload)) {
+      return callback(new Error('The password you entered has no permissions to upload an image'));
+    }
+
+    // Check if file is image
+    if (!file.mimetype.startsWith('image')) {
+      return callback(new Error('Invalid file type, must be an image.'));
+    }
+
+    // Everything is valid
+    callback(null, true);
   }
 });
 
