@@ -9,6 +9,7 @@ import constants from "../models/constants";
 import asyncValidator from "../middlewares/asyncValidator";
 import multer from 'multer';
 import path from "path";
+import fs from 'fs/promises';
 
 const getExtensionString = (filename: string) => {
   return filename.substring(filename.lastIndexOf('.'));
@@ -262,7 +263,12 @@ export const item_delete_get = asyncHandler(async (req: IdRequest, res: RenderRe
 
 // Handle deleting item on POST
 export const item_delete_post = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  await Item.findByIdAndDelete<IItem>(req.params.id).exec();
+  const item = await Item.findById<IItem>(req.params.id).exec();
+  await Item.deleteOne({ _id: req.params.id });
+  if (item && item.imageUrl) {
+    const filepath = path.join(__dirname, '../uploads' + item.imageUrl.substring('/upload'.length));
+    await fs.unlink(filepath);
+  }
   res.redirect('/items');
 });
 
@@ -317,10 +323,19 @@ export const item_update_post = [
       });
     }
 
+    const imageUrl = (req.file) ? `/upload/${req.file.filename}` : null;
+
+    // Delete previous image (if that is being updated)
+    const prevItem = await Item.findById<IItem>(req.params.id).exec();
+    if (imageUrl && prevItem?.imageUrl) {
+      const filepath = path.join(__dirname, '../uploads' + prevItem.imageUrl.substring('/upload'.length));
+      await fs.unlink(filepath);
+    }
+
     // Update item
     const item = new Item({
+      imageUrl,
       name: req.body.name,
-      imageUrl: (req.file) ? `/upload/${req.file.filename}` : null,
       description: req.body.description,
       price: req.body.price,
       units: req.body.units,
