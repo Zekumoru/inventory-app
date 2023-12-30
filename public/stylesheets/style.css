@@ -331,3 +331,7 @@ form .form-group {
 .underline {
   text-decoration: underline;
 }
+
+.bold {
+  font-weight: bold;
+}
