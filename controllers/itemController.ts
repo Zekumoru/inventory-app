@@ -26,12 +26,19 @@ const storage = multer.diskStorage({
 });
 
 const fileSizeLimitKB = 200;
+const totalFilesLimit = 100;
 const upload = multer({
   storage,
   limits: {
     fileSize: 1024 * fileSizeLimitKB, // 200 KB
   },
-  fileFilter: (req, file, callback) => {
+  fileFilter: async (req, file, callback) => {
+    const uploadDir = await fs.readdir(path.join(__dirname, '../uploads'));
+
+    if (uploadDir.length > totalFilesLimit) {
+      return callback(new Error('Reached maximum storage, you cannot upload anymore images'));
+    }
+
     if (file.mimetype.startsWith('image')) {
       return callback(null, true);
     }
