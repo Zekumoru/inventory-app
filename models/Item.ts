@@ -4,6 +4,7 @@ import constants from "./constants";
 
 export interface IItem {
   name: string;
+  imageUrl?: string | null;
   description: string;
   category: ICategory | Types.ObjectId | null;
   price: number;
@@ -21,6 +22,10 @@ const ItemSchema = new Schema({
     minLength: constants["item-name-min-length"],
     maxLength: constants["item-name-max-length"],
     required: true,
+    trim: true,
+  },
+  imageUrl: {
+    type: String,
     trim: true,
   },
   description: {

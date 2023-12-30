@@ -2,12 +2,50 @@ import { NextFunction, Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import Item, { IItem } from "../models/Item";
 import { IdRequest, RenderResponse } from "../types/controller";
-import { Types, isValidObjectId } from "mongoose";
+import { isValidObjectId } from "mongoose";
 import { ValidationError, body, validationResult } from "express-validator";
 import Category, { ICategory } from "../models/Category";
 import constants from "../models/constants";
-import { ResultWithContext } from "express-validator/src/chain";
 import asyncValidator from "../middlewares/asyncValidator";
+import multer from 'multer';
+import path from "path";
+import fs from 'fs/promises';
+
+const getExtensionString = (filename: string) => {
+  return filename.substring(filename.lastIndexOf('.'));
+};
+
+const storage = multer.diskStorage({
+  destination: (req, file, callback) => {
+    callback(null, path.join(__dirname, '../uploads'))
+  },
+  filename: (req, file, callback) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    callback(null, file.fieldname + '-' + uniqueSuffix + getExtensionString(file.originalname));
+  },
+});
+
+const fileSizeLimitKB = 200;
+const totalFilesLimit = 100;
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 1024 * fileSizeLimitKB, // 200 KB
+  },
+  fileFilter: async (req, file, callback) => {
+    const uploadDir = await fs.readdir(path.join(__dirname, '../uploads'));
+
+    if (uploadDir.length > totalFilesLimit) {
+      return callback(new Error('Reached maximum storage, you cannot upload anymore images'));
+    }
+
+    if (file.mimetype.startsWith('image')) {
+      return callback(null, true);
+    }
+
+    return callback(new Error('Invalid file type, must be an image.'));
+  }
+});
 
 // Types for item list
 interface ItemListLocals {
@@ -76,6 +114,7 @@ interface ItemFormLocals {
   title: string;
   submitButtonText: string;
   name?: string;
+  imageUrl?: string | null;
   description?: string;
   category?: string | null,
   price?: number;
@@ -109,6 +148,21 @@ export const item_create_get = asyncHandler(async (req: Request<{}, {}, ItemForm
 
 // Validation array
 const itemValidations = [
+  upload.single('image'),
+  async (err: Error, req: Request, res: Response, next: NextFunction) => {
+    await body('image')
+      .custom(() => {
+        if (err.message.match(/File too large/)) {
+          throw new Error(`File too large, limit is ${fileSizeLimitKB} KB`);
+        }
+
+        if (err.message) {
+          throw err;
+        }
+      })
+      .run(req);
+    next();
+  },
   body('name')
     .trim()
     .isLength({ min: constants["item-name-min-length"], max: constants["item-name-max-length"] })
@@ -187,6 +241,7 @@ export const item_create_post = [
     // Create item
     const item = new Item({
       name: req.body.name,
+      imageUrl: (req.file) ? `/upload/${req.file.filename}` : null,
       description: req.body.description,
       price: req.body.price,
       units: req.body.units,
@@ -223,7 +278,12 @@ export const item_delete_get = asyncHandler(async (req: IdRequest, res: RenderRe
 
 // Handle deleting item on POST
 export const item_delete_post = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  await Item.findByIdAndDelete<IItem>(req.params.id).exec();
+  const item = await Item.findById<IItem>(req.params.id).exec();
+  await Item.deleteOne({ _id: req.params.id });
+  if (item && item.imageUrl) {
+    const filepath = path.join(__dirname, '../uploads' + item.imageUrl.substring('/upload'.length));
+    await fs.unlink(filepath);
+  }
   res.redirect('/items');
 });
 
@@ -243,6 +303,7 @@ export const item_update_get = asyncHandler(async (req: IdRequest, res: RenderRe
     title: 'Update item',
     submitButtonText: 'Update item',
     name: item.name,
+    imageUrl: item.imageUrl,
     description: item.description ?? '',
     category: item.category?._id.toString() ?? null,
     price: item.price!,
@@ -268,6 +329,7 @@ export const item_update_post = [
         title: 'Update item',
         submitButtonText: 'Update item',
         name: req.body.name,
+        imageUrl: req.body.imageUrl,
         price: req.body.price,
         units: req.body.units,
         description: req.body.description,
@@ -278,8 +340,18 @@ export const item_update_post = [
       });
     }
 
+    const imageUrl = (req.file) ? `/upload/${req.file.filename}` : null;
+
+    // Delete previous image (if that is being updated)
+    const prevItem = await Item.findById<IItem>(req.params.id).exec();
+    if (imageUrl && prevItem?.imageUrl) {
+      const filepath = path.join(__dirname, '../uploads' + prevItem.imageUrl.substring('/upload'.length));
+      await fs.unlink(filepath);
+    }
+
     // Update item
     const item = new Item({
+      imageUrl: imageUrl ?? prevItem?.imageUrl,
       name: req.body.name,
       description: req.body.description,
       price: req.body.price,
