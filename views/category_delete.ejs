@@ -16,7 +16,15 @@
     <% } else { %>
       <form action="<%= category.url %>/delete" method="post">
         <h3><%= category.name %></h3>
-        <p>Are you sure you want to delete this category? Deleting this category will put all of its items uncategorized!</p>
+        
+        <div class="form-group">
+          <label for="password">Enter password to delete this category</label>
+          <input id="password" name="password" type="password" value="<%= locals.password %>" placeholder="Insert password here..." required />
+          <% if (locals.errors && locals.errors.password) { %>
+            <div class="error"><%= locals.errors.password.msg %></div>
+          <% } %>
+        </div>
+
         <button class="mt-16 delete-btn">Delete this category</button>
       </form>
     <% } %>
