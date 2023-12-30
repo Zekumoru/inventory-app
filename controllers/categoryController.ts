@@ -231,7 +231,7 @@ export const category_delete_post = [
   asyncHandler(async (req: IdRequest, res: RenderResponse<CategoryDeleteLocals>, next: NextFunction) => {
     const errors = validationResult(req);
 
-    const category = await Category.findById<ICategory>(req.params.id).exec();
+    const category = await Category.findById(req.params.id).exec();
     if (!category) {
       // Category already deleted so redirect
       return res.redirect('/categories');
@@ -241,7 +241,7 @@ export const category_delete_post = [
       // There are errors.
       return res.render('category_delete', {
         title: 'Delete category',
-        category,
+        category: category as unknown as ICategory,
         errors: errors.mapped(),
       });
     }
@@ -249,10 +249,11 @@ export const category_delete_post = [
     const items = await Item.find({ category: req.params.id }).exec();
     await Promise.all([
       Category.findByIdAndDelete(req.params.id).exec(),
+      InstanceAccess.deleteMany({ category: category._id }).exec(),
       ...items.map(async (item) => {
         item.category = null;
         item.save();
-      })
+      }),
     ]);
 
     res.redirect('/categories');
