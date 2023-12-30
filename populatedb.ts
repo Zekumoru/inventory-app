@@ -1,14 +1,47 @@
 #! /usr/bin/env ts-node
+/**
+ * Populate db script
+ * 
+ * Usage:
+ * 
+ *     ts-node populatedb.ts -p <password>
+ * 
+ * Options:
+ * 
+ *     -p | --password <password>
+ *         Sets the access password for all sample data.
+ * 
+ * WARNING: the password must already exists!
+ *     
+ */
 import 'dotenv/config';
 import debugExtended from './utils/debug-extended';
 import Category, { ICategory } from './models/Category';
 import mongoose, { Types } from 'mongoose';
 import Item, { IItem } from './models/Item';
+import Access from './models/Access';
+import InstanceAccess from './models/InstanceAccess';
 
 const debug = debugExtended("inventory:populate-script");
 
 const items = new Map<string, Types.ObjectId>();
 const categories = new Map<string, Types.ObjectId>();
+
+/**
+ * Get password from command line argument
+ */
+let password = '';
+
+const isOption = (arg: string) => {
+  return password.startsWith('-') || password.startsWith('--');
+}
+
+process.argv.forEach((arg, index, array) => {
+  if (arg === '-p' || arg === '--password') {
+    password = array[index + 1];
+    if (!password || isOption(password)) password = '';
+  }
+});
 
 /**
  * Connect to mongodb
@@ -19,6 +52,10 @@ const dbConnectionString = process.env.MONGODB_CONNECT_STRING;
 (async () => {
   if (dbConnectionString === undefined) {
     throw new Error('mongodb connection string is not defined');
+  }
+
+  if (password === '') {
+    throw new Error('password cannot be empty');
   }
 
   debug('Connecting to mongodb...');
@@ -47,14 +84,38 @@ async function populate() {
 
 async function categoryCreate(category: ICategory) {
   const categoryDoc = new Category(category);
-  await categoryDoc.save();
+  const access = await Access.findOne({ password });
+  if (!access) throw new Error('missing access document which contains the password provided');
+
+  const accessInstance = new InstanceAccess({
+    category: categoryDoc._id,
+    access: access._id,
+  });
+
+  await Promise.all([
+    categoryDoc.save(),
+    accessInstance.save(),
+  ]);
+
   categories.set(category.name, categoryDoc._id);
   debug(`Added category: ${category.name}`);
 }
 
 async function itemCreate(item: IItem) {
   const itemDoc = new Item(item);
-  await itemDoc.save();
+  const access = await Access.findOne({ password });
+  if (!access) throw new Error('missing access document which contains the password provided');
+
+  const accessInstance = new InstanceAccess({
+    item: itemDoc._id,
+    access: access._id,
+  });
+
+  await Promise.all([
+    itemDoc.save(),
+    accessInstance.save(),
+  ]);
+
   items.set(item.name, itemDoc._id);
   debug(`Added item: ${item.name}`);
 }
