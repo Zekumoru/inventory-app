@@ -151,16 +151,37 @@ button:hover {
 .item-list {
   display: grid;
   gap: 16px;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
 }
 
 .item-list .item-card {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  padding: 16px;
   background-color: var(--primary-color);
   border-radius: 8px;
+  padding-bottom: 16px;
+}
+
+.item-list .item-image {
+  margin-bottom: 16px;
+}
+
+.item-list .item-image img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 8px 8px 0 0;
+  background-color: var(--secondary-color);
+  object-fit: cover;
+  object-position: center;
+}
+
+.item-list .item-image img.no-image {
+  opacity: 40%;
+}
+
+.item-list .item-details,
+.item-list .item-footer {
+  padding-inline: 16px;
 }
 
 .item-list .item-name {
@@ -171,6 +192,10 @@ button:hover {
 
 .item-list .item-price {
   font-size: 1.4rem;
+}
+
+.item-list .item-footer {
+  margin-top: auto;
 }
 
 .item-list .item-units {

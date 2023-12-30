@@ -64,6 +64,9 @@
       <div class="form-group">
         <label for="image">Select an image</label>
         <input id="image" name="image" type="file" accept="image/*" />
+        <% if (locals.errors && locals.errors.image) { %>
+          <div class="error"><%= locals.errors.image.msg %></div>
+        <% } %>
       </div>
       
       <div>* means required</div>

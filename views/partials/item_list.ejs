@@ -1,7 +1,17 @@
 <ul class="item-list">
   <% locals.items.forEach((item) => { %>
     <li class="item-card">
-      <div>
+      <div class="item-image" aria-hidden="true">
+        <a href="<%= item.url %>">
+          <% if (item.imageUrl) { %>
+            <img src="<%= item.imageUrl %>" alt="">
+          <% } else {%>
+            <img class="no-image" src="images/no-image.png" alt="">
+          <% } %>
+        </a>
+      </div>
+
+      <div class="item-details">
         <a class="item-name" href="<%= item.url %>"><%= item.name %></a>
         <div class="my-4 item-category">
           <% if (item.category) { %>
@@ -13,7 +23,7 @@
         <div class="my-4 item-price">$<%= item.price.toFixed(2) %></div>
       </div>
       
-      <div>
+      <div class="item-footer">
         <div class="my-4 item-units"><%= item.units %> left</div>
       </div>
     </li>

@@ -26,6 +26,13 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
+  fileFilter: (req, file, callback) => {
+    if (file.mimetype.startsWith('image')) {
+      return callback(null, true);
+    }
+
+    return callback(new Error('Invalid file type, must be an image.'));
+  }
 });
 
 // Types for item list
@@ -95,6 +102,7 @@ interface ItemFormLocals {
   title: string;
   submitButtonText: string;
   name?: string;
+  imageUrl?: string;
   description?: string;
   category?: string | null,
   price?: number;
@@ -129,6 +137,16 @@ export const item_create_get = asyncHandler(async (req: Request<{}, {}, ItemForm
 // Validation array
 const itemValidations = [
   upload.single('image'),
+  async (err: Error, req: Request, res: Response, next: NextFunction) => {
+    await body('image')
+      .custom(() => {
+        if (err.message) {
+          throw err;
+        }
+      })
+      .run(req);
+    next();
+  },
   body('name')
     .trim()
     .isLength({ min: constants["item-name-min-length"], max: constants["item-name-max-length"] })
@@ -207,6 +225,7 @@ export const item_create_post = [
     // Create item
     const item = new Item({
       name: req.body.name,
+      imageUrl: (req.file) ? `/upload/${req.file.filename}` : null,
       description: req.body.description,
       price: req.body.price,
       units: req.body.units,
@@ -301,6 +320,7 @@ export const item_update_post = [
     // Update item
     const item = new Item({
       name: req.body.name,
+      imageUrl: (req.file) ? `/upload/${req.file.filename}` : null,
       description: req.body.description,
       price: req.body.price,
       units: req.body.units,
