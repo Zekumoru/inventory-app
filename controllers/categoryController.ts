@@ -6,6 +6,9 @@ import Item, { IItem } from "../models/Item";
 import { isValidObjectId } from "mongoose";
 import { ValidationError, body, validationResult } from "express-validator";
 import constants from "../models/constants";
+import asyncValidator from "../middlewares/asyncValidator";
+import Access, { IAccess } from "../models/Access";
+import InstanceAccess from "../models/InstanceAccess";
 
 // Types for category list
 interface CategoryListLocals {
@@ -86,6 +89,7 @@ interface CategoryFormLocals {
 interface CategoryFormBody {
   name: string;
   description: string;
+  password: string;
 }
 
 // Display create form on GET
@@ -115,6 +119,19 @@ const categoryValidations = [
 export const category_create_post = [
   // Validate and sanitize fields
   ...categoryValidations,
+  asyncValidator(
+    body('password')
+      .custom(async (password) => {
+        const access = await Access.findOne<IAccess>({ password }).exec();
+        if (access === null) {
+          throw new Error('The password you entered has no permissions to create a new category');
+        }
+        if (access.perms.all || access.perms.insert) {
+          return;
+        }
+        throw new Error('The password you entered has no permissions to create a new category');
+      })
+  ),
 
   // Process request after validation and sanitization
   asyncHandler(async (req: Request<{}, {}, CategoryFormBody>, res: RenderResponse<CategoryFormLocals>, next: NextFunction) => {
@@ -138,7 +155,18 @@ export const category_create_post = [
       description: req.body.description,
     });
 
-    await category.save();
+    const access = await Access.findOne({ password: req.body.password });
+    if (!access) throw new Error('Missing access document');
+    const accessInstance = new InstanceAccess({
+      category: category._id,
+      access: access._id,
+    });
+
+    await Promise.all([
+      category.save(),
+      accessInstance.save(),
+    ]);
+
     res.redirect((category as unknown as ICategory).url);
   }),
 ];
@@ -168,23 +196,68 @@ export const category_delete_get = asyncHandler(async (req: IdRequest, res: Rend
   })
 });
 
+// Types for delete item view
+interface CategoryDeleteLocals {
+  title: string;
+  category: ICategory;
+  errors: Record<string, ValidationError>;
+}
+
 // Handle deleting category on POST
-export const category_delete_post = asyncHandler(async (req: IdRequest, res: Response, next: NextFunction) => {
-  const category = await Category.findByIdAndDelete<ICategory>(req.params.id).exec();
+export const category_delete_post = [
+  asyncValidator(
+    body('password')
+      .custom(async (password, { req }) => {
+        const access = await Access.findOne({ password }).exec();
+        if (access === null) {
+          throw new Error('The password you entered has no permissions to delete a category');
+        }
 
-  if (!category) {
-    // Category already deleted so redirect
-    return res.redirect('/categories');
-  }
+        const accessInstance = await InstanceAccess.findOne({
+          category: req.params!.id,
+          access: access._id,
+        }).exec();
+        if (accessInstance === null) {
+          throw new Error('The password you entered has no permissions to delete a category');
+        }
 
-  const items = await Item.find({ category: req.params.id }).exec();
-  await Promise.all(items.map(async (item) => {
-    item.category = null;
-    item.save();
-  }));
+        if (access.perms && (access.perms?.all || access.perms?.delete)) {
+          return;
+        }
 
-  res.redirect('/categories');
-});
+        throw new Error('The password you entered has no permissions to delete a category');
+      })
+  ),
+  asyncHandler(async (req: IdRequest, res: RenderResponse<CategoryDeleteLocals>, next: NextFunction) => {
+    const errors = validationResult(req);
+
+    const category = await Category.findById<ICategory>(req.params.id).exec();
+    if (!category) {
+      // Category already deleted so redirect
+      return res.redirect('/categories');
+    }
+
+    if (!errors.isEmpty()) {
+      // There are errors.
+      return res.render('category_delete', {
+        title: 'Delete category',
+        category,
+        errors: errors.mapped(),
+      });
+    }
+
+    const items = await Item.find({ category: req.params.id }).exec();
+    await Promise.all([
+      Category.findByIdAndDelete(req.params.id).exec(),
+      ...items.map(async (item) => {
+        item.category = null;
+        item.save();
+      })
+    ]);
+
+    res.redirect('/categories');
+  })
+];
 
 // Display update page on GET
 export const category_update_get = asyncHandler(async (req: IdRequest, res: RenderResponse<CategoryFormLocals>, next: NextFunction) => {
@@ -208,6 +281,29 @@ export const category_update_get = asyncHandler(async (req: IdRequest, res: Rend
 export const category_update_post = [
   // Validate and sanitize fields
   ...categoryValidations,
+  asyncValidator(
+    body('password')
+      .custom(async (password, { req }) => {
+        const access = await Access.findOne({ password }).exec();
+        if (access === null) {
+          throw new Error('The password you entered has no permissions to update a category');
+        }
+
+        const accessInstance = await InstanceAccess.findOne({
+          category: req.params!.id,
+          access: access._id,
+        }).exec();
+        if (accessInstance === null) {
+          throw new Error('The password you entered has no permissions to update a category');
+        }
+
+        if (access.perms && (access.perms?.all || access.perms?.update)) {
+          return;
+        }
+
+        throw new Error('The password you entered has no permissions to update a category');
+      })
+  ),
 
   // Process request after validation and sanitization
   asyncHandler(async (req: IdRequest, res: RenderResponse<CategoryFormLocals>, next: NextFunction) => {
