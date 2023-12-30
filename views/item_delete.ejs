@@ -8,33 +8,36 @@
 <body>
   <%- include('partials/sidebar') %>
 
-  <main>
+  <main class="item-delete">
     <h1><%= locals.title %></h1>
     
     <% if (!locals.item) { %>
       <p>The item you're looking for does not exist.</p>
     <% } else { %>
-      <form action="<%= item.url %>/delete" method="post">
-        <h3 class="mb-4"><%= item.name %></h3>
-
-        <% if (item.category) { %>
-          <div class="mb-8 item-category"><a href="<%= item.category.url %>"><%= item.category.name %></a></div>
-        <% } else { %>
-          <div class="mb-8 item-category">uncategorized</div>
+      <div class="container">
+        <% if (locals.item && locals.item.imageUrl) {%>
+          <img class="item-image" src="<%= item.imageUrl %>" alt="">
         <% } %>
-        <div class="item-price">$<%= item.price.toFixed(2) %></div>
-        <div class="item-units"><%= item.units %> left in stock</div>
-
-        <div class="form-group mt-16 mb-16">
-          <label for="password">Enter password to delete this item</label>
-          <input id="password" name="password" type="password" value="<%= locals.password %>" placeholder="Insert password here..." required />
-          <% if (locals.errors && locals.errors.password) { %>
-            <div class="error"><%= locals.errors.password.msg %></div>
+        
+        <form action="<%= item.url %>/delete" method="post">
+          <h3 class="mb-4"><%= item.name %></h3>
+          <% if (item.category) { %>
+            <div class="mb-8 item-category"><a href="<%= item.category.url %>"><%= item.category.name %></a></div>
+          <% } else { %>
+            <div class="mb-8 item-category">uncategorized</div>
           <% } %>
-        </div>
-
-        <button>Delete item</button>
-      </form>
+          <div class="item-price">$<%= item.price.toFixed(2) %></div>
+          <div class="item-units"><%= item.units %> left in stock</div>
+          <div class="form-group mt-16 mb-16">
+            <label for="password">Enter password to delete this item</label>
+            <input id="password" name="password" type="password" value="<%= locals.password %>" placeholder="Insert password here..." required />
+            <% if (locals.errors && locals.errors.password) { %>
+              <div class="error"><%= locals.errors.password.msg %></div>
+            <% } %>
+          </div>
+          <button>Delete item</button>
+        </form>
+      </div>
     <% } %>
   </main>
 </body>

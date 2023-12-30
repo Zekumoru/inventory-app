@@ -130,6 +130,7 @@ button:hover {
  * Item styles
  */
 
+.item-delete .container,
 .item-detail .container {
   display: flex;
   flex-direction: column;
@@ -137,6 +138,7 @@ button:hover {
   align-items: flex-start;
 }
 
+.item-delete img.item-image,
 .item-detail img.item-image {
   width: 100%;
   object-fit: contain;
@@ -267,10 +269,12 @@ form .form-group {
    * Item styles
    */
 
+  .item-delete img.item-image,
   .item-detail img.item-image {
     width: 240px;
   }
 
+  .item-delete .container,
   .item-detail .container {
     flex-direction: row;
   }
