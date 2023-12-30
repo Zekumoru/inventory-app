@@ -8,12 +8,15 @@
 <body>
   <%- include('partials/sidebar') %>
   
-  <h1><%= locals.message %></h1>
-
-  <% if (locals.error) { %>
-    <h2><%= locals.error.status %></h2>
-    <pre><%= locals.error.stack %></pre>
-  <% } %>
+  <main>
+    <h1><%= locals.message %></h1>
+    <p>The page or resource you're looking for does not exist!</p>
+  
+    <% if (locals.error) { %>
+      <h2><%= locals.error.status %></h2>
+      <pre><%= locals.error.stack %></pre>
+    <% } %>
+  </main>
 </body>
 
 </html>
