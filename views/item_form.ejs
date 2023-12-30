@@ -73,6 +73,14 @@
           <img class="item-image" src="<%= locals.imageUrl %>" alt="">
         <% } %>
       </div>
+
+      <div class="form-group">
+        <label for="password">Password *</label>
+        <input id="password" name="password" type="password" value="<%= locals.password %>" placeholder="Insert password here..." required />
+        <% if (locals.errors && locals.errors.password) { %>
+          <div class="error"><%= locals.errors.password.msg %></div>
+        <% } %>
+      </div>
       
       <div>* means required</div>
 

@@ -10,6 +10,8 @@ import asyncValidator from "../middlewares/asyncValidator";
 import multer from 'multer';
 import path from "path";
 import fs from 'fs/promises';
+import Access, { IAccess } from "../models/Access";
+import InstanceAccess from "../models/InstanceAccess";
 
 const getExtensionString = (filename: string) => {
   return filename.substring(filename.lastIndexOf('.'));
@@ -33,17 +35,39 @@ const upload = multer({
     fileSize: 1024 * fileSizeLimitKB, // 200 KB
   },
   fileFilter: async (req, file, callback) => {
+    // Check if reached max storage
     const uploadDir = await fs.readdir(path.join(__dirname, '../uploads'));
-
     if (uploadDir.length > totalFilesLimit) {
       return callback(new Error('Reached maximum storage, you cannot upload anymore images'));
     }
 
-    if (file.mimetype.startsWith('image')) {
-      return callback(null, true);
+    // Check if has permisson to upload
+    const access = await Access.findOne({ password: req.body.password }).exec();
+    if (access === null) {
+      return callback(new Error('The password you entered has no permissions to upload an image'));
     }
 
-    return callback(new Error('Invalid file type, must be an image.'));
+    if (req.params.id) {
+      const accessInstance = await InstanceAccess.findOne({
+        item: req.params.id,
+        access: access._id,
+      }).exec();
+      if (accessInstance === null) {
+        return callback(new Error('The password you entered has no permissions to upload an image'));
+      }
+    }
+
+    if (access.perms && !(access.perms?.all || access.perms?.upload)) {
+      return callback(new Error('The password you entered has no permissions to upload an image'));
+    }
+
+    // Check if file is image
+    if (!file.mimetype.startsWith('image')) {
+      return callback(new Error('Invalid file type, must be an image.'));
+    }
+
+    // Everything is valid
+    callback(null, true);
   }
 });
 
@@ -130,6 +154,7 @@ interface ItemFormBody {
   category: string | null;
   price: number;
   units: number;
+  password: string;
   referred?: boolean;
 }
 
@@ -201,6 +226,19 @@ const itemValidations = [
 export const item_create_post = [
   // Validate and sanitize fields
   ...itemValidations,
+  asyncValidator(
+    body('password')
+      .custom(async (password) => {
+        const access = await Access.findOne<IAccess>({ password }).exec();
+        if (access === null) {
+          throw new Error('The password you entered has no permissions to create a new item');
+        }
+        if (access.perms.all || access.perms.insert) {
+          return;
+        }
+        throw new Error('The password you entered has no permissions to create a new item');
+      })
+  ),
 
   // Process request after validation and sanitization
   asyncHandler(async (req: Request<{}, {}, ItemFormBody>, res: RenderResponse<ItemFormLocals>, next: NextFunction) => {
@@ -246,9 +284,19 @@ export const item_create_post = [
       price: req.body.price,
       units: req.body.units,
       category: req.body.category,
-    })
+    });
 
-    await item.save();
+    const access = await Access.findOne({ password: req.body.password });
+    if (!access) throw new Error('Missing access document');
+    const accessInstance = new InstanceAccess({
+      item: item._id,
+      access: access._id,
+    });
+
+    await Promise.all([
+      item.save(),
+      accessInstance.save(),
+    ]);
     res.redirect((item as unknown as IItem).url);
   }),
 ];
@@ -276,16 +324,67 @@ export const item_delete_get = asyncHandler(async (req: IdRequest, res: RenderRe
   });
 })
 
+// Types for delete item view
+interface ItemDeleteLocals {
+  title: string;
+  item: IItem;
+  errors: Record<string, ValidationError>;
+}
+
 // Handle deleting item on POST
-export const item_delete_post = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  const item = await Item.findById<IItem>(req.params.id).exec();
-  await Item.deleteOne({ _id: req.params.id });
-  if (item && item.imageUrl) {
-    const filepath = path.join(__dirname, '../uploads' + item.imageUrl.substring('/upload'.length));
-    await fs.unlink(filepath);
-  }
-  res.redirect('/items');
-});
+export const item_delete_post = [
+  asyncValidator(
+    body('password')
+      .custom(async (password, { req }) => {
+        const access = await Access.findOne({ password }).exec();
+        if (access === null) {
+          throw new Error('The password you entered has no permissions to delete an item');
+        }
+
+        const accessInstance = await InstanceAccess.findOne({
+          item: req.params!.id,
+          access: access._id,
+        }).exec();
+        if (accessInstance === null) {
+          throw new Error('The password you entered has no permissions to delete an item');
+        }
+
+        if (access.perms && (access.perms?.all || access.perms?.delete)) {
+          return;
+        }
+
+        throw new Error('The password you entered has no permissions to delete an item');
+      })
+  ),
+  asyncHandler(async (req: Request, res: RenderResponse<ItemDeleteLocals>, next: NextFunction) => {
+    const errors = validationResult(req);
+
+    const item = await Item.findById(req.params.id).exec();
+    if (!item) throw new Error('Missing item to delete');
+
+    if (!errors.isEmpty()) {
+      // There are errors.
+      return res.render('item_delete', {
+        title: 'Delete an item',
+        item: item as unknown as IItem,
+        errors: errors.mapped(),
+      });
+    }
+
+    let imageFilePath = '';
+    if (item && item.imageUrl) {
+      imageFilePath = path.join(__dirname, '../uploads' + item.imageUrl.substring('/upload'.length));
+    }
+
+    await Promise.all([
+      (imageFilePath) ? fs.unlink(imageFilePath) : null,
+      Item.deleteOne({ _id: req.params.id }).exec(),
+      InstanceAccess.deleteMany({ item: item._id }).exec(),
+    ]);
+
+    res.redirect('/items');
+  })
+];
 
 // Display update page on GET
 export const item_update_get = asyncHandler(async (req: IdRequest, res: RenderResponse<ItemFormLocals>, next: NextFunction) => {
@@ -317,6 +416,29 @@ export const item_update_get = asyncHandler(async (req: IdRequest, res: RenderRe
 export const item_update_post = [
   // Validate and sanitize fields
   ...itemValidations,
+  asyncValidator(
+    body('password')
+      .custom(async (password, { req }) => {
+        const access = await Access.findOne({ password }).exec();
+        if (access === null) {
+          throw new Error('The password you entered has no permissions to update an item');
+        }
+
+        const accessInstance = await InstanceAccess.findOne({
+          item: req.params!.id,
+          access: access._id,
+        }).exec();
+        if (accessInstance === null) {
+          throw new Error('The password you entered has no permissions to update an item');
+        }
+
+        if (access.perms && (access.perms?.all || access.perms?.update)) {
+          return;
+        }
+
+        throw new Error('The password you entered has no permissions to update an item');
+      })
+  ),
 
   // Process request after validation and sanitization
   asyncHandler(async (req: IdRequest, res: RenderResponse<ItemFormLocals>, next: NextFunction) => {
