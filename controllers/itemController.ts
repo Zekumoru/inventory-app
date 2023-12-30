@@ -302,24 +302,67 @@ export const item_delete_get = asyncHandler(async (req: IdRequest, res: RenderRe
   });
 })
 
+// Types for delete item view
+interface ItemDeleteLocals {
+  title: string;
+  item: IItem;
+  errors: Record<string, ValidationError>;
+}
+
 // Handle deleting item on POST
-export const item_delete_post = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  const item = await Item.findById(req.params.id).exec();
-  if (!item) throw new Error('Missing item to delete');
+export const item_delete_post = [
+  asyncValidator(
+    body('password')
+      .custom(async (password, { req }) => {
+        const access = await Access.findOne({ password }).exec();
+        if (access === null) {
+          throw new Error('The password you entered has no permissions to delete an item');
+        }
 
-  let imageFilePath = '';
-  if (item && item.imageUrl) {
-    imageFilePath = path.join(__dirname, '../uploads' + item.imageUrl.substring('/upload'.length));
-  }
+        const accessInstance = await InstanceAccess.findOne({
+          item: req.params!.id,
+          access: access._id,
+        }).exec();
+        if (accessInstance === null) {
+          throw new Error('The password you entered has no permissions to delete an item');
+        }
 
-  await Promise.all([
-    (imageFilePath) ? fs.unlink(imageFilePath) : null,
-    Item.deleteOne({ _id: req.params.id }).exec(),
-    InstanceAccess.deleteMany({ item: item._id }).exec(),
-  ]);
+        if (access.perms && (access.perms?.all || access.perms?.delete)) {
+          return;
+        }
 
-  res.redirect('/items');
-});
+        throw new Error('The password you entered has no permissions to delete an item');
+      })
+  ),
+  asyncHandler(async (req: Request, res: RenderResponse<ItemDeleteLocals>, next: NextFunction) => {
+    const errors = validationResult(req);
+
+    const item = await Item.findById(req.params.id).exec();
+    if (!item) throw new Error('Missing item to delete');
+
+    if (!errors.isEmpty()) {
+      // There are errors.
+      return res.render('item_delete', {
+        title: 'Delete an item',
+        item: item as unknown as IItem,
+        errors: errors.mapped(),
+      });
+    }
+
+    let imageFilePath = '';
+    if (item && item.imageUrl) {
+      imageFilePath = path.join(__dirname, '../uploads' + item.imageUrl.substring('/upload'.length));
+    }
+
+    await Promise.all([
+      (imageFilePath) ? fs.unlink(imageFilePath) : null,
+      Item.deleteOne({ _id: req.params.id }).exec(),
+      InstanceAccess.deleteMany({ item: item._id }).exec(),
+    ]);
+
+    res.redirect('/items');
+  })
+];
 
 // Display update page on GET
 export const item_update_get = asyncHandler(async (req: IdRequest, res: RenderResponse<ItemFormLocals>, next: NextFunction) => {
