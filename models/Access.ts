@@ -1,29 +1,32 @@
-import { Schema, Types, model } from 'mongoose'
-import { IItem } from './Item';
-import { ICategory } from './Category';
+import { Schema, model } from 'mongoose'
 
 export interface IAccess {
-  item?: IItem | Types.ObjectId;
-  category?: ICategory | Types.ObjectId;
   password: string;
+  perms: {
+    all?: boolean;
+    insert?: boolean;
+    update?: boolean;
+    upload?: boolean;
+    delete?: boolean;
+  };
 }
 
 const AccessSchema = new Schema({
-  item: {
-    type: Schema.Types.ObjectId,
-    ref: 'Item',
-  },
-  category: {
-    type: Schema.Types.ObjectId,
-    ref: 'Item',
-  },
   password: {
     type: String,
     minLength: 3,
     maxLength: 30,
-    required: true,
     trim: true,
-  }
+    required: true,
+    unique: true,
+  },
+  perms: {
+    all: Boolean,
+    insert: Boolean,
+    update: Boolean,
+    upload: Boolean,
+    delete: Boolean,
+  },
 })
 
 export default model('Access', AccessSchema);
