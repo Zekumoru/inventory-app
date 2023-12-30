@@ -9,24 +9,32 @@
   <%- include('partials/sidebar') %>
 
   <main class="item-detail">
-    <h1 class="mb-4"><%= locals.title %></h1>
-    
     <% if (!locals.item) { %>
+      <h1 class="mb-4"><%= locals.title %></h1>
       <p>The item you're looking for does not exist.</p>
     <% } else { %>
-      <% if (item.category) { %>
-        <div class="mb-8 item-category"><a href="<%= item.category.url %>"><%= item.category.name %></a></div>
-      <% } else { %>
-        <div class="mb-8 item-category">uncategorized</div>
-      <% } %>
-      <div class="item-price">$<%= item.price.toFixed(2) %></div>
-      <div class="item-units"><%= item.units %> left in stock</div>
-      <h4>Description</h4>
-      <p class="mb-16 item-description"><%= item.description %></p>
-      
-      <div class="buttons-flex-wrap">
-        <a class="button" href="<%= item.url %>/update" role="button">Update this item</a>
-        <a class="button" href="<%= item.url %>/delete" role="button">Delete this item</a>
+      <div class="container">
+        <% if (locals.item && locals.item.imageUrl) {%>
+          <img class="item-image" src="<%= item.imageUrl %>" alt="">
+        <% } %>
+
+        <div class="detail-container">
+          <h1 class="mb-4"><%= locals.title %></h1>
+          <% if (item.category) { %>
+            <div class="mb-8 item-category"><a href="<%= item.category.url %>"><%= item.category.name %></a></div>
+          <% } else { %>
+            <div class="mb-8 item-category">uncategorized</div>
+          <% } %>
+          <div class="item-price">$<%= item.price.toFixed(2) %></div>
+          <div class="item-units"><%= item.units %> left in stock</div>
+          <h4>Description</h4>
+          <p class="mb-16 item-description"><%= item.description %></p>
+          
+          <div class="buttons-flex-wrap">
+            <a class="button" href="<%= item.url %>/update" role="button">Update this item</a>
+            <a class="button" href="<%= item.url %>/delete" role="button">Delete this item</a>
+          </div>
+        </div>
       </div>
     <% } %>
   </main>

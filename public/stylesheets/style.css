@@ -130,6 +130,18 @@ button:hover {
  * Item styles
  */
 
+.item-detail .container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.item-detail img.item-image {
+  width: 100%;
+  object-fit: contain;
+}
+
 .item-category,
 .item-category a {
   color: var(--text-color-secondary);
@@ -246,6 +258,19 @@ form .form-group {
     margin: 0 auto;
     flex-direction: row;
   }
+
+  /**
+   * Item styles
+   */
+
+  .item-detail img.item-image {
+    width: 240px;
+  }
+
+  .item-detail .container {
+    flex-direction: row;
+  }
+
 }
 
 /**
