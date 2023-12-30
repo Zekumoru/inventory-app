@@ -27,8 +27,11 @@
           <% } %>
           <div class="item-price">$<%= item.price.toFixed(2) %></div>
           <div class="item-units"><%= item.units %> left in stock</div>
-          <h4>Description</h4>
-          <p class="mb-16 item-description"><%= item.description %></p>
+
+          <% if (item.description) { %>
+            <h4>Description</h4>
+            <p class="mb-16 item-description"><%= item.description %></p>
+          <% } %>
           
           <div class="buttons-flex-wrap">
             <a class="button" href="<%= item.url %>/update" role="button">Update this item</a>

@@ -14,8 +14,10 @@
     <% if (!locals.category) { %>
       <p>The category you're looking for does not exist.</p>
     <% } else { %>
-      <h4>Description</h4>
-      <p class="category-description mb-16"><%= category.description %></p>
+      <% if (category.description) { %>
+        <h4>Description</h4>
+        <p class="category-description mb-16"><%= category.description %></p>
+      <% } %>
 
       <div class="buttons-flex-wrap">
         <form action="/item/create" method="post">
