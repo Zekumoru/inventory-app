@@ -360,7 +360,10 @@ export const item_delete_post = [
     const errors = validationResult(req);
 
     const item = await Item.findById(req.params.id).exec();
-    if (!item) throw new Error('Missing item to delete');
+    if (!item) {
+      // Item already deleted so redirect
+      return res.redirect('/items');
+    }
 
     if (!errors.isEmpty()) {
       // There are errors.
